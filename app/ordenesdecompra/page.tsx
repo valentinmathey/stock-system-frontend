@@ -1,0 +1,81 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { PageContainer } from "@/components/Varios/PageContainer";
+import { NuevaOrdenCompra } from "@/components/OrdenesDeCompra/NuevaOrdenDeCompra";
+import { OrdenDeCompraCard } from "@/components/OrdenesDeCompra/OrdenDeCompraCard";
+
+
+type OrdenCompra = {
+  id: number;
+  fechaOrden: string;
+  proveedor: { nombreProveedor: string };
+  total: number;
+};
+
+const ordenesDePrueba: OrdenCompra[] = [
+  {
+    id: 1,
+    fechaOrden: "2024-05-01",
+    proveedor: { nombreProveedor: "Ferromax" },
+    total: 12500,
+  },
+  {
+    id: 2,
+    fechaOrden: "2024-05-15",
+    proveedor: { nombreProveedor: "Acindar" },
+    total: 18200,
+  },
+];
+
+export default function OrdenesPage() {
+  const [ordenes, setOrdenes] = useState<OrdenCompra[]>([]);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
+
+  const cargarOrdenes = () => {
+    fetch("http://localhost:3000/ordenes")
+      .then((res) => {
+        if (!res.ok) throw new Error("Backend no disponible");
+        return res.json();
+      })
+      .then((data) => setOrdenes(data))
+      .catch(() => setOrdenes(ordenesDePrueba));
+  };
+
+  useEffect(() => {
+    cargarOrdenes();
+  }, []);
+
+  const ordenesFiltradas = ordenes.filter((o) =>
+    o.proveedor.nombreProveedor.toLowerCase().includes(busqueda.toLowerCase())
+  );
+
+  return (
+    <PageContainer valorBusqueda={busqueda} onBuscar={setBusqueda}>
+      <div className="px-8 pt-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-black">Órdenes de compra</h1>
+          <button
+            onClick={() => setModalAbierto(true)}
+            className="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700 transition"
+          >
+            + Nueva orden
+          </button>
+        </div>
+
+        <OrdenDeCompraCard ordenes={ordenesFiltradas} />
+      </div>
+
+      {modalAbierto && (
+        <NuevaOrdenCompra
+          cerrar={() => setModalAbierto(false)}
+          alGuardar={() => {
+            setModalAbierto(false);
+            cargarOrdenes();
+          }}
+        />
+      )}
+    </PageContainer>
+  );
+}
