@@ -9,6 +9,11 @@ type Articulo = {
   stockSeguridad: number;
   costoAlmacenamientoPorUnidad: number;
   precioVentaUnitarioArticulo: number;
+  cgi: number;
+  loteOptimo: number;
+  puntoPedido: number;
+  inventarioMaximo: number;
+  demandaAnual: number;
   proveedorPredeterminado?: {
     id: number;
     nombreProveedor: string;
@@ -30,8 +35,13 @@ export function ArticuloTable({ articulos }: Props) {
             <th className="px-4 py-3 text-left">Descripción</th>
             <th className="px-4 py-3 text-center">Stock actual</th>
             <th className="px-4 py-3 text-center">Stock seguridad</th>
+            <th className="px-4 py-3 text-center">Costo Almacenamiento</th>
             <th className="px-4 py-3 text-center">Costo unidad ($)</th>
-            <th className="px-4 py-3 text-center">Precio venta ($)</th>
+            <th className="px-4 py-3 text-center">CGI</th>
+            <th className="px-4 py-3 text-center">Lote Óptimo</th>
+            <th className="px-4 py-3 text-center">Punto Pedido</th>
+            <th className="px-4 py-3 text-center">Inventario Máximo</th>
+            <th className="px-4 py-3 text-center">Demanda Anual</th>
             <th className="px-4 py-3 text-left">Proveedor</th>
           </tr>
         </thead>
@@ -50,12 +60,28 @@ export function ArticuloTable({ articulos }: Props) {
               >
                 {a.stockActual}
               </td>
-              <td className="px-4 py-2 text-center">{a.stockSeguridad}</td>
+              <td className="px-4 py-2 text-center">
+                {a.stockSeguridad}</td>
               <td className="px-4 py-2 text-center">
                 ${a.costoAlmacenamientoPorUnidad.toFixed(2)}
               </td>
               <td className="px-4 py-2 text-center">
                 ${a.precioVentaUnitarioArticulo.toFixed(2)}
+              </td>
+              <td className="px-4 py-2 text-center">
+                {a.cgi.toFixed(2)}
+              </td>
+              <td className="px-4 py-2 text-center">
+                {a.loteOptimo.toFixed(2)}
+              </td>
+              <td className="px-4 py-2 text-center">
+                {a.puntoPedido.toFixed(2)}
+              </td>
+              <td className="px-4 py-2 text-center">
+                {a.inventarioMaximo.toFixed(2)}
+              </td>
+              <td className="px-4 py-2 text-center">
+                {a.demandaAnual.toFixed(2)}
               </td>
               <td className="px-4 py-2">
                 {a.proveedorPredeterminado?.nombreProveedor || "—"}

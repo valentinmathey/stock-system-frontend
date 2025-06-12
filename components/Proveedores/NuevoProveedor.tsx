@@ -1,28 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   cerrar: () => void;
   alGuardar: () => void;
 };
 
+type Articulo = {
+  id: number;
+  nombreArticulo: string;
+};
+
 export function NuevoProveedor({ cerrar, alGuardar }: Props) {
+  const [articulosDisponibles, setArticulosDisponibles] = useState<Articulo[]>(
+    []
+  );
+
   const [formulario, setFormulario] = useState({
     codigoProveedor: "",
     nombreProveedor: "",
+    articulo: {
+      proveedorId: 0,
+      articuloId: 0,
+      modeloInventario: "LOTE_FIJO",
+      costoPedido: 0,
+      costoCompraUnitarioArticulo: 0,
+      demoraEntregaProveedor: 0,
+      tiempoRevision: undefined as number | undefined,
+
+    },
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    fetch("http://localhost:3000/articulos")
+      .then((res) => res.json())
+      .then(setArticulosDisponibles)
+      .catch(() => setArticulosDisponibles([]));
+  }, []);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormulario((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name in formulario.articulo) {
+      setFormulario((prev) => ({
+        ...prev,
+        articulo: {
+          ...prev.articulo,
+          [name]: name === "articuloId" ? Number(value) : Number(value),
+        },
+      }));
+    } else {
+      setFormulario((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const res = await fetch("http://localhost:3000/proveedores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,6 +96,69 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
           <input
             type="text"
             name="nombreProveedor"
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+
+          <label className="font-medium">Artículo</label>
+          <select
+            name="articuloId"
+            value={formulario.articulo.articuloId}
+            onChange={handleChange}
+            className="col-span-2 border border-gray-300 rounded px-3 py-2"
+          >
+            <option value={0}>Seleccionar artículo</option>
+            {articulosDisponibles.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.nombreArticulo}
+              </option>
+            ))}
+          </select>
+          <label className="font-medium">Modelo de Inventario</label>
+          <select
+            name="modeloInventario"
+            value={formulario.articulo.modeloInventario}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          >
+            <option value="LOTE_FIJO">Lote Fijo</option>
+            <option value="TIMEPO_FIJO">Tiempo Fijo</option>
+          </select>
+
+          <label className="font-medium">Costo pedido</label>
+          <input
+            type="number"
+            name="costoPedido"
+            value={formulario.articulo.costoPedido}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+
+          <label className="font-medium">Costo compra unitario</label>
+          <input
+            type="number"
+            name="costoCompraUnitarioArticulo"
+            value={formulario.articulo.costoCompraUnitarioArticulo}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+
+          <label className="font-medium">Demora entrega (días)</label>
+          <input
+            type="number"
+            name="demoraEntregaProveedor"
+            value={formulario.articulo.demoraEntregaProveedor}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-3 py-2"
+          />
+
+          <label className="font-medium">
+            Tiempo de Revisión
+          </label>
+          <input
+            type="number"
+            name="proximaFechaRevision"
+            value={formulario.articulo.tiempoRevision}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
