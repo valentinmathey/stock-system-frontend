@@ -7,31 +7,11 @@ import { NuevoProveedor } from "@/components/Proveedores/NuevoProveedor";
 
 type Proveedor = {
   id: number;
+  codigoProveedor: string;
   nombreProveedor: string;
-  cuitProveedor: string;
-  telefonoProveedor: string;
-  correoProveedor: string;
-  direccionProveedor: string;
 };
 
-const proveedoresDePrueba: Proveedor[] = [
-  {
-    id: 1,
-    nombreProveedor: "Holcim",
-    cuitProveedor: "30-12345678-9",
-    telefonoProveedor: "261-1234567",
-    correoProveedor: "contacto@holcim.com",
-    direccionProveedor: "Av. Cemento 123",
-  },
-  {
-    id: 2,
-    nombreProveedor: "Ferromax",
-    cuitProveedor: "30-23456789-0",
-    telefonoProveedor: "261-9876543",
-    correoProveedor: "ventas@ferromax.com",
-    direccionProveedor: "Calle Fierro 456",
-  },
-];
+
 
 export default function ProveedoresPage() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
@@ -45,7 +25,6 @@ export default function ProveedoresPage() {
         return res.json();
       })
       .then((data) => setProveedores(data))
-      .catch(() => setProveedores(proveedoresDePrueba));
   };
 
   useEffect(() => {

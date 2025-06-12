@@ -10,22 +10,20 @@ import { NuevaVenta } from "@/components/Ventas/NuevaVenta";
 type Venta = {
   id: number;
   fechaVenta: string;
-  cliente: string;
-  total: number;
+  ventaTotal: number;
 };
+
 
 const ventasDePrueba: Venta[] = [
   {
     id: 1,
     fechaVenta: "2024-06-01",
-    cliente: "Juan Pérez",
-    total: 2500,
+    ventaTotal: 2500,
   },
   {
     id: 2,
     fechaVenta: "2024-06-03",
-    cliente: "Obras Mendoza SRL",
-    total: 7200,
+    ventaTotal: 7200,
   },
 ];
 
@@ -48,9 +46,8 @@ export default function VentasPage() {
     cargarVentas();
   }, []);
 
-  const ventasFiltradas = ventas.filter((v) =>
-    v.cliente.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const ventasFiltradas = ventas; // o filtrá por fecha si querés
+
 
   return (
     <PageContainer valorBusqueda={busqueda} onBuscar={setBusqueda}>

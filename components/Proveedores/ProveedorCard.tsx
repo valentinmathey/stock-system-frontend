@@ -1,12 +1,8 @@
 type Proveedor = {
   id: number;
+  codigoProveedor: string;
   nombreProveedor: string;
-  cuitProveedor: string;
-  telefonoProveedor: string;
-  correoProveedor: string;
-  direccionProveedor: string;
 };
-
 
 type Props = {
   proveedores: Proveedor[];
@@ -19,20 +15,14 @@ export function ProveedorCard({ proveedores }: Props) {
         <thead className="bg-gray-100 text-xs text-gray-600 uppercase">
           <tr>
             <th className="px-4 py-3 text-left">Nombre</th>
-            <th className="px-4 py-3 text-left">CUIT</th>
-            <th className="px-4 py-3 text-left">Teléfono</th>
-            <th className="px-4 py-3 text-left">Correo</th>
-            <th className="px-4 py-3 text-left">Dirección</th>
+            <th className="px-4 py-3 text-left">Código</th>
           </tr>
         </thead>
         <tbody>
           {proveedores.map((p) => (
             <tr key={p.id} className="border-b hover:bg-gray-50">
               <td className="px-4 py-2 font-medium">{p.nombreProveedor}</td>
-              <td className="px-4 py-2">{p.cuitProveedor}</td>
-              <td className="px-4 py-2">{p.telefonoProveedor}</td>
-              <td className="px-4 py-2">{p.correoProveedor}</td>
-              <td className="px-4 py-2">{p.direccionProveedor}</td>
+              <td className="px-4 py-2 font-medium">{p.codigoProveedor}</td>
             </tr>
           ))}
         </tbody>
