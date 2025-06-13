@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 type Proveedor = {
   id: number;
   codigoProveedor: string;
@@ -9,6 +13,8 @@ type Props = {
 };
 
 export function ProveedorCard({ proveedores }: Props) {
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState<number | null>(null);
+
   return (
     <div className="w-full overflow-x-auto rounded shadow bg-white">
       <table className="w-full text-sm text-gray-700">
@@ -27,6 +33,7 @@ export function ProveedorCard({ proveedores }: Props) {
           ))}
         </tbody>
       </table>
+
     </div>
   );
 }
