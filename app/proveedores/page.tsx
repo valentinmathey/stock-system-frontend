@@ -11,8 +11,6 @@ type Proveedor = {
   nombreProveedor: string;
 };
 
-
-
 export default function ProveedoresPage() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -24,7 +22,7 @@ export default function ProveedoresPage() {
         if (!res.ok) throw new Error("Backend no disponible");
         return res.json();
       })
-      .then((data) => setProveedores(data))
+      .then((data) => setProveedores(data));
   };
 
   useEffect(() => {
@@ -55,6 +53,7 @@ export default function ProveedoresPage() {
         <NuevoProveedor
           cerrar={() => setModalAbierto(false)}
           alGuardar={() => {
+            console.log("guardando proveedor...");
             setModalAbierto(false);
             cargarProveedores();
           }}

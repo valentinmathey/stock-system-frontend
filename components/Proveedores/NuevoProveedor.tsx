@@ -22,13 +22,12 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
     nombreProveedor: "",
     articulo: {
       proveedorId: 0,
-      articuloId: 0,
+      articuloId: undefined,
       modeloInventario: "LOTE_FIJO",
-      costoPedido: 0,
-      costoCompraUnitarioArticulo: 0,
-      demoraEntregaProveedor: 0,
+      costoPedido: undefined,
+      costoCompraUnitarioArticulo: undefined,
+      demoraEntregaProveedor: undefined,
       tiempoRevision: undefined as number | undefined,
-
     },
   });
 
@@ -89,6 +88,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             type="text"
             name="codigoProveedor"
             onChange={handleChange}
+            required
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
@@ -97,6 +97,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             type="text"
             name="nombreProveedor"
             onChange={handleChange}
+            required
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
@@ -105,6 +106,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             name="articuloId"
             value={formulario.articulo.articuloId}
             onChange={handleChange}
+            required
             className="col-span-2 border border-gray-300 rounded px-3 py-2"
           >
             <option value={0}>Seleccionar artículo</option>
@@ -120,9 +122,10 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             value={formulario.articulo.modeloInventario}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           >
             <option value="LOTE_FIJO">Lote Fijo</option>
-            <option value="TIMEPO_FIJO">Tiempo Fijo</option>
+            <option value="TIEMPO_FIJO">Tiempo Fijo</option>
           </select>
 
           <label className="font-medium">Costo pedido</label>
@@ -131,6 +134,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             name="costoPedido"
             value={formulario.articulo.costoPedido}
             onChange={handleChange}
+            required
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
@@ -139,6 +143,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             type="number"
             name="costoCompraUnitarioArticulo"
             value={formulario.articulo.costoCompraUnitarioArticulo}
+            required
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
@@ -149,16 +154,16 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             name="demoraEntregaProveedor"
             value={formulario.articulo.demoraEntregaProveedor}
             onChange={handleChange}
+            required
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
-          <label className="font-medium">
-            Tiempo de Revisión
-          </label>
+          <label className="font-medium">Tiempo de Revisión</label>
           <input
             type="number"
             name="proximaFechaRevision"
             value={formulario.articulo.tiempoRevision}
+            required
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />

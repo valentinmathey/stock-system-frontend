@@ -36,7 +36,7 @@ export default function ArticulosPage() {
         if (!res.ok) throw new Error("Backend no disponible");
         return res.json();
       })
-      .then((data) => setArticulos(data))
+      .then((data) => setArticulos(data));
   };
 
   useEffect(() => {
@@ -69,6 +69,7 @@ export default function ArticulosPage() {
         <NuevoArticulo
           cerrar={() => setModalAbierto(false)}
           alGuardar={() => {
+            console.log("Guardando articulo");
             setModalAbierto(false);
             cargarArticulos();
           }}

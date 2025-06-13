@@ -9,9 +9,9 @@ type Articulo = {
   stockSeguridad: number;
   costoAlmacenamientoPorUnidad: number;
   precioVentaUnitarioArticulo: number;
-  cgi: number;
-  loteOptimo: number;
-  puntoPedido: number;
+  cgi?: number;
+  loteOptimo?: number;
+  puntoPedido?: number;
   inventarioMaximo: number;
   demandaAnual: number;
   proveedorPredeterminado?: {
@@ -60,22 +60,19 @@ export function ArticuloTable({ articulos }: Props) {
               >
                 {a.stockActual}
               </td>
-              <td className="px-4 py-2 text-center">
-                {a.stockSeguridad}</td>
+              <td className="px-4 py-2 text-center">{a.stockSeguridad}</td>
               <td className="px-4 py-2 text-center">
                 ${a.costoAlmacenamientoPorUnidad.toFixed(2)}
               </td>
               <td className="px-4 py-2 text-center">
                 ${a.precioVentaUnitarioArticulo.toFixed(2)}
               </td>
+              <td className="px-4 py-2 text-center">{a.cgi?.toFixed(2)}</td>
               <td className="px-4 py-2 text-center">
-                {a.cgi.toFixed(2)}
+                {a.loteOptimo?.toFixed(2)}
               </td>
               <td className="px-4 py-2 text-center">
-                {a.loteOptimo.toFixed(2)}
-              </td>
-              <td className="px-4 py-2 text-center">
-                {a.puntoPedido.toFixed(2)}
+                {a.puntoPedido?.toFixed(2)}
               </td>
               <td className="px-4 py-2 text-center">
                 {a.inventarioMaximo.toFixed(2)}

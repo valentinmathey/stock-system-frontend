@@ -53,6 +53,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("llegué");
     const res = await fetch("http://localhost:3000/articulos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -81,6 +82,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             name="codigoArticulo"
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           />
 
           <label className="font-medium">Nombre</label>
@@ -89,6 +91,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             name="nombreArticulo"
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           />
 
           <label className="font-medium">Descripción</label>
@@ -105,6 +108,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             name="precioVentaUnitarioArticulo"
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           />
 
           <label className="font-medium">Costo almacenamiento ($)</label>
@@ -113,6 +117,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             name="costoAlmacenamientoPorUnidad"
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           />
 
           <label className="font-medium">Stock actual</label>
@@ -121,6 +126,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             name="stockActual"
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           />
 
           <label className="font-medium">Stock seguridad</label>
@@ -129,6 +135,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             name="stockSeguridad"
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           />
 
           <label className="font-medium">Lote óptimo</label>
@@ -160,6 +167,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             name="inventarioMaximo"
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           />
 
           <label className="font-medium">Demanda anual</label>
@@ -168,6 +176,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             name="demandaAnual"
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
+            required
           />
 
           <label className="font-medium">Proveedor</label>
@@ -176,7 +185,6 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             value={formulario.proveedorPredeterminadoId}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
-            required
           >
             <option value="">Seleccioná un proveedor</option>
             {proveedores.map((p) => (

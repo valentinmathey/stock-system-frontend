@@ -5,7 +5,6 @@ import { PageContainer } from "@/components/Varios/PageContainer";
 import { NuevaOrdenCompra } from "@/components/OrdenesDeCompra/NuevaOrdenDeCompra";
 import { OrdenDeCompraCard } from "@/components/OrdenesDeCompra/OrdenDeCompraCard";
 
-
 type OrdenCompra = {
   id: number;
   fechaOrden: string;
@@ -34,7 +33,7 @@ export default function OrdenesPage() {
   const [busqueda, setBusqueda] = useState("");
 
   const cargarOrdenes = () => {
-    fetch("http://localhost:3000/ordenes")
+    fetch("http://localhost:3000/ordenes-compra")
       .then((res) => {
         if (!res.ok) throw new Error("Backend no disponible");
         return res.json();
