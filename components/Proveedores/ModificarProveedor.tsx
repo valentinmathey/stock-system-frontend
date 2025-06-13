@@ -2,53 +2,69 @@
 
 import { useEffect, useState } from "react";
 
-type Props = {
-  cerrar: () => void;
-  alGuardar: () => void;
-};
-
 type Articulo = {
   id: number;
   nombreArticulo: string;
 };
 
-export function NuevoProveedor({ cerrar, alGuardar }: Props) {
-  const [articulosDisponibles, setArticulosDisponibles] = useState<Articulo[]>(
-    []
-  );
+type Props = {
+  proveedorId: number;
+  cerrar: () => void;
+  alGuardar: () => void;
+};
 
+export default function ModificarProveedor({
+  proveedorId,
+  cerrar,
+  alGuardar,
+}: Props) {
   const [formulario, setFormulario] = useState({
-    codigoProveedor: "",
     nombreProveedor: "",
     articulo: {
-      proveedorId: 0,
-      articuloId: undefined,
+      articuloId: 0,
       modeloInventario: "LOTE_FIJO",
-      costoPedido: undefined,
-      costoCompraUnitarioArticulo: undefined,
-      demoraEntregaProveedor: undefined,
+      costoPedido: 0,
+      costoCompraUnitarioArticulo: 0,
+      demoraEntregaProveedor: 0,
       tiempoRevision: undefined as number | undefined,
     },
   });
 
+  const [articulos, setArticulos] = useState<Articulo[]>([]);
+
   useEffect(() => {
+    fetch(`http://localhost:3000/proveedores/${proveedorId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setFormulario({
+          nombreProveedor: data.nombreProveedor,
+          articulo: {
+            articuloId: data.articulos?.[0]?.id || 0,
+            modeloInventario: "LOTE_FIJO",
+            costoPedido: 0,
+            costoCompraUnitarioArticulo: 0,
+            demoraEntregaProveedor: 0,
+            tiempoRevision: undefined,
+          },
+        });
+      });
+
     fetch("http://localhost:3000/articulos")
       .then((res) => res.json())
-      .then(setArticulosDisponibles)
-      .catch(() => setArticulosDisponibles([]));
-  }, []);
+      .then(setArticulos)
+      .catch(() => setArticulos([]));
+  }, [proveedorId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    console.log(value);
     if (name in formulario.articulo) {
       setFormulario((prev) => ({
         ...prev,
         articulo: {
           ...prev.articulo,
-          [name]: name === "articuloId" ? value : value,
+          [name]: name === "modeloInventario" ? value : Number(value),
         },
       }));
     } else {
@@ -62,41 +78,38 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:3000/proveedores", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formulario),
-    });
+    const res = await fetch(
+      `http://localhost:3000/proveedores/${proveedorId}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formulario),
+      }
+    );
 
     if (res.ok) {
       alGuardar();
       cerrar();
     } else {
-      alert("Error al crear proveedor");
+      alert("Error al modificar proveedor");
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center text-black">
       <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-8 z-50 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-6 text-center">Nuevo proveedor</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Modificar proveedor
+        </h2>
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-2 gap-x-6 gap-y-4"
         >
-          <label className="font-medium">Código</label>
-          <input
-            type="text"
-            name="codigoProveedor"
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-
           <label className="font-medium">Nombre</label>
           <input
             type="text"
             name="nombreProveedor"
+            value={formulario.nombreProveedor}
             onChange={handleChange}
             required
             className="w-full border border-gray-300 rounded px-3 py-2"
@@ -111,12 +124,13 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             className="col-span-2 border border-gray-300 rounded px-3 py-2"
           >
             <option value={0}>Seleccionar artículo</option>
-            {articulosDisponibles.map((a) => (
+            {articulos.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.nombreArticulo}
               </option>
             ))}
           </select>
+
           <label className="font-medium">Modelo de Inventario</label>
           <select
             name="modeloInventario"
@@ -162,9 +176,8 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
           <label className="font-medium">Tiempo de Revisión</label>
           <input
             type="number"
-            name="proximaFechaRevision"
-            value={formulario.articulo.tiempoRevision}
-            required
+            name="tiempoRevision"
+            value={formulario.articulo.tiempoRevision ?? ""}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
@@ -181,7 +194,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
               type="submit"
               className="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700"
             >
-              Guardar proveedor
+              Guardar cambios
             </button>
           </div>
         </form>
