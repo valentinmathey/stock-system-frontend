@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { HTMLInputTypeAttribute, useEffect, useState } from "react";
+import { GesProInputNumber, GesProInputText } from "../GesproInputs";
 
 type Props = {
   cerrar: () => void;
@@ -76,114 +77,88 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
           onSubmit={handleSubmit}
           className="grid grid-cols-2 gap-x-6 gap-y-4"
         >
-          <label className="font-medium">Código</label>
-          <input
-            type="text"
+          <GesProInputText
             name="codigoArticulo"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            required
+            handleChange={handleChange}
+            label="Código"
           />
 
-          <label className="font-medium">Nombre</label>
-          <input
-            type="text"
+          <GesProInputText
             name="nombreArticulo"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            label="Nombre"
+            handleChange={handleChange}
             required
           />
 
-          <label className="font-medium">Descripción</label>
-          <input
-            type="text"
+          <GesProInputText
             name="descripcionArticulo"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            handleChange={handleChange}
+            required={false}
+            label="Descripción"
           />
 
-          <label className="font-medium">Precio venta ($)</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="precioVentaUnitarioArticulo"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            required
+            handleChange={handleChange}
+            label="Precio Venta ($)"
           />
 
-          <label className="font-medium">Costo almacenamiento ($)</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="costoAlmacenamientoPorUnidad"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            label="Costo almacenamiento ($)"
+            handleChange={handleChange}
             required
           />
 
-          <label className="font-medium">Stock actual</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="stockActual"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            required
+            handleChange={handleChange}
+            label="Stock Actual"
           />
 
-          <label className="font-medium">Stock seguridad</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="stockSeguridad"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            required
+            handleChange={handleChange}
+            label="Stock Seguridad"
           />
 
-          <label className="font-medium">Lote óptimo</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="loteOptimo"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            handleChange={handleChange}
+            label="Lote óptimo"
+            required={false}
           />
-          <label className="font-medium">CGI</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="cgi"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            handleChange={handleChange}
+            label="CGI"
+            required={false}
           />
 
-          <label className="font-medium">Punto de pedido</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="puntoPedido"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            handleChange={handleChange}
+            label="Punto de pedido"
+            required={false}
           />
 
-          <label className="font-medium">Inventario máximo</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="inventarioMaximo"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            required
+            label="Inventario máximo"
+            handleChange={handleChange}
           />
 
-          <label className="font-medium">Demanda anual</label>
-          <input
-            type="number"
+          <GesProInputNumber
             name="demandaAnual"
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            required
+            label="Demanda anual"
+            handleChange={handleChange}
           />
-
           <label className="font-medium">Proveedor</label>
           <select
             name="proveedorPredeterminadoId"
             value={formulario.proveedorPredeterminadoId}
             onChange={handleChange}
+            required
             className="w-full border border-gray-300 rounded px-3 py-2"
           >
             <option value="">Seleccioná un proveedor</option>
