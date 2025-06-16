@@ -29,8 +29,18 @@ export default function ListaProveedoresCard({
       `http://localhost:3000/articulos-proveedores/por-articulo/${articuloId}`
     )
       .then((r) => r.json())
-      .then(setRelaciones)
-      .catch(() => setRelaciones([]));
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setRelaciones(data);
+        } else {
+          console.warn("Respuesta inesperada:", data);
+          setRelaciones([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Error al cargar relaciones:", err);
+        setRelaciones([]);
+      });
   }, [articuloId]);
 
   return (
