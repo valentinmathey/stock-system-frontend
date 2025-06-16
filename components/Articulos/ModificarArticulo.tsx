@@ -1,9 +1,8 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 
-type Proveedor = {
-  id: number;
-  nombreProveedor: string;
-};
+type Proveedor = { id: number; nombreProveedor: string };
 
 type Articulo = {
   id: number;
@@ -17,32 +16,27 @@ type Props = {
   alGuardar: () => void;
 };
 
-const ModificarArticulo = ({ articulo, cerrar, alGuardar }: Props) => {
+export default function ModificarArticulo({
+  articulo,
+  cerrar,
+  alGuardar,
+}: Props) {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [proveedorId, setProveedorId] = useState<number | undefined>(
     articulo.proveedorPredeterminado?.id
   );
 
+  /* cargar proveedores válidos */
   useEffect(() => {
-  fetch(
-    `http://localhost:3000/articulos-proveedores/proveedores-por-articulo/${articulo.id}`
-  )
-    .then((res) => res.json())
-    .then((data) => {
-      if (Array.isArray(data)) {
-        setProveedores(data);
-      } else {
-        console.warn("Respuesta inesperada:", data);
-        setProveedores([]);
-      }
-    })
-    .catch((err) => {
-      console.error("Error al cargar proveedores:", err);
-      setProveedores([]);
-    });
-}, [articulo.id]);
+    fetch(
+      `http://localhost:3000/articulos-proveedores/proveedores-por-articulo/${articulo.id}`
+    )
+      .then((r) => r.json())
+      .then((data) => (Array.isArray(data) ? setProveedores(data) : []))
+      .catch(() => setProveedores([]));
+  }, [articulo.id]);
 
-
+  /* guardar */
   const handleGuardar = async () => {
     try {
       const res = await fetch(
@@ -54,24 +48,24 @@ const ModificarArticulo = ({ articulo, cerrar, alGuardar }: Props) => {
         }
       );
 
-      if (res.ok) {
-        alGuardar();
-      } else {
+      if (res.ok) alGuardar();
+      else {
         const err = await res.json().catch(() => ({}));
         alert(`Error al guardar: ${err.message ?? "sin detalle"}`);
-        console.error("Error backend:", err);
       }
-    } catch (e) {
+    } catch {
       alert("Error al guardar (sin conexión con backend)");
-      console.error(e);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center text-black">
-      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 z-50 max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center
+                 bg-black/60 text-black"
+    >
+      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-center">
-          Modificar proveedor de "{articulo.nombreArticulo}"
+          Modificar proveedor de “{articulo.nombreArticulo}”
         </h2>
 
         <label className="block mb-2 font-medium">
@@ -104,6 +98,4 @@ const ModificarArticulo = ({ articulo, cerrar, alGuardar }: Props) => {
       </div>
     </div>
   );
-};
-
-export default ModificarArticulo;
+}

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import ModificarProveedor from "./ModificarProveedor";
+import ProviderActions from "./ProviderActions";    
+import ListaArtProvCard from "./ListaArtProvCard";     
 
 type Proveedor = {
   id: number;
@@ -9,13 +11,12 @@ type Proveedor = {
   nombreProveedor: string;
 };
 
-type Props = {
-  proveedores: Proveedor[];
-};
+type Props = { proveedores: Proveedor[] };
 
 export function ProveedorCard({ proveedores }: Props) {
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
+  const [modalAgregar, setModalAgregar] = useState(false);
+  const [modalLista, setModalLista]   = useState(false);
+  const [provSel, setProvSel] = useState<Proveedor | null>(null);
 
   return (
     <>
@@ -32,17 +33,18 @@ export function ProveedorCard({ proveedores }: Props) {
             {proveedores.map((p) => (
               <tr key={p.id} className="border-b hover:bg-gray-50">
                 <td className="px-4 py-2 font-medium">{p.nombreProveedor}</td>
-                <td className="px-4 py-2 font-medium">{p.codigoProveedor}</td>
-                <td className="text-center">
-                  <button
-                    onClick={() => {
-                      setProveedorSeleccionado(p);
-                      setModalAbierto(true);
+                <td className="px-4 py-2">{p.codigoProveedor}</td>
+                <td className="px-4 py-2 text-center">
+                  <ProviderActions
+                    onAgregarArticulo={() => {
+                      setProvSel(p);
+                      setModalAgregar(true);
                     }}
-                    className="bg-violet-600 px-4 py-2 m-1 rounded-xs font-medium text-white"
-                  >
-                    Agregar articulo
-                  </button>
+                    onVerLista={() => {
+                      setProvSel(p);
+                      setModalLista(true);
+                    }}
+                  />
                 </td>
               </tr>
             ))}
@@ -50,14 +52,24 @@ export function ProveedorCard({ proveedores }: Props) {
         </table>
       </div>
 
-      {modalAbierto && proveedorSeleccionado && (
+      {/* Modal agregar artículo */}
+      {modalAgregar && provSel && (
         <ModificarProveedor
-          proveedorId={proveedorSeleccionado.id}
-          cerrar={() => setModalAbierto(false)}
+          proveedorId={provSel.id}
+          cerrar={() => setModalAgregar(false)}
           alGuardar={() => {
-            console.log("Guardando proveedor");
-            setModalAbierto(false);
+            setModalAgregar(false);
+            // refresh desde la página si lo necesitas
           }}
+        />
+      )}
+
+      {/* Modal lista artículos */}
+      {modalLista && provSel && (
+        <ListaArtProvCard
+          proveedorId={provSel.id}
+          nombreProveedor={provSel.nombreProveedor}
+          cerrar={() => setModalLista(false)}
         />
       )}
     </>
