@@ -39,9 +39,9 @@ export function ProveedorCard({ proveedores }: Props) {
                       setProveedorSeleccionado(p);
                       setModalAbierto(true);
                     }}
-                    className="bg-violet-600 px-4 py-2 rounded-xs font-medium text-white"
+                    className="bg-violet-600 px-4 py-2 m-1 rounded-xs font-medium text-white"
                   >
-                    Modificar
+                    Agregar articulo
                   </button>
                 </td>
               </tr>

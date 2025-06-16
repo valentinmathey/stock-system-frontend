@@ -42,13 +42,26 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    console.log(value);
+
+    // Campos del objeto "articulo" que deben ser numéricos
+    const numericFields = [
+      "articuloId",
+      "costoPedido",
+      "costoCompraUnitarioArticulo",
+      "demoraEntregaProveedor",
+      "tiempoRevision",
+    ];
+
     if (name in formulario.articulo) {
       setFormulario((prev) => ({
         ...prev,
         articulo: {
           ...prev.articulo,
-          [name]: name === "articuloId" ? value : value,
+          [name]: numericFields.includes(name)
+            ? value === ""
+              ? undefined
+              : Number(value)
+            : value,
         },
       }));
     } else {
@@ -72,7 +85,9 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
       alGuardar();
       cerrar();
     } else {
-      alert("Error al crear proveedor");
+      const error = await res.json().catch(() => ({}));
+      console.error("Error al crear proveedor:", error);
+      alert(`Error al crear proveedor: ${error.message || "ver consola"}`);
     }
   };
 
@@ -162,7 +177,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
           <label className="font-medium">Tiempo de Revisión</label>
           <input
             type="number"
-            name="proximaFechaRevision"
+            name="tiempoRevision"
             value={formulario.articulo.tiempoRevision}
             required
             onChange={handleChange}

@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import ModificarArticulo from "./ModificarArticulo";
+import ArticuloActions from "./ArticuloActions";
+import ListaProveedoresCard from "./ListaProveedoresCard";
 
+/* ---------- Tipos ---------- */
 type Articulo = {
   id: number;
   codigoArticulo: string;
@@ -17,22 +20,23 @@ type Articulo = {
   puntoPedido?: number;
   inventarioMaximo: number;
   demandaAnual: number;
-  proveedorPredeterminado?: {
-    id: number;
-    nombreProveedor: string;
-  };
+  proveedorPredeterminado?: { id: number; nombreProveedor: string };
 };
 
 type Props = {
   articulos: Articulo[];
+  onGuardar: () => void; // callback para recargar lista desde el padre
 };
 
-export function ArticuloTable({ articulos }: Props) {
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [articuloSeleccionado, setArticuloSeleccionado] = useState<Articulo | null>(null);
+/* --------------------------------------------------------------- */
+export function ArticuloTable({ articulos, onGuardar }: Props) {
+  const [modalPred, setModalPred] = useState(false);  // modal asignar proveedor
+  const [modalLista, setModalLista] = useState(false); // modal ver lista
+  const [artSel, setArtSel] = useState<Articulo | null>(null);
 
   return (
     <>
+      {/* ---------------- Tabla ---------------- */}
       <div className="w-full overflow-x-auto rounded shadow bg-white">
         <table className="w-full text-sm text-gray-700">
           <thead className="bg-gray-100 text-xs text-gray-600 uppercase">
@@ -53,12 +57,14 @@ export function ArticuloTable({ articulos }: Props) {
               <th className="px-4 py-2 text-center">Acciones</th>
             </tr>
           </thead>
+
           <tbody>
             {articulos.map((a) => (
               <tr key={a.id} className="border-b hover:bg-gray-50">
                 <td className="px-4 py-2">{a.codigoArticulo}</td>
                 <td className="px-4 py-2 font-medium">{a.nombreArticulo}</td>
                 <td className="px-4 py-2">{a.descripcionArticulo}</td>
+
                 <td
                   className={`px-4 py-2 text-center font-bold ${
                     a.stockActual <= a.stockSeguridad
@@ -68,6 +74,7 @@ export function ArticuloTable({ articulos }: Props) {
                 >
                   {a.stockActual}
                 </td>
+
                 <td className="px-4 py-2 text-center">{a.stockSeguridad}</td>
                 <td className="px-4 py-2 text-center">
                   ${a.costoAlmacenamientoPorUnidad.toFixed(2)}
@@ -75,6 +82,7 @@ export function ArticuloTable({ articulos }: Props) {
                 <td className="px-4 py-2 text-center">
                   ${a.precioVentaUnitarioArticulo.toFixed(2)}
                 </td>
+
                 <td className="px-4 py-2 text-center">{a.cgi?.toFixed(2)}</td>
                 <td className="px-4 py-2 text-center">
                   {a.loteOptimo?.toFixed(2)}
@@ -88,19 +96,22 @@ export function ArticuloTable({ articulos }: Props) {
                 <td className="px-4 py-2 text-center">
                   {a.demandaAnual.toFixed(2)}
                 </td>
+
                 <td className="px-4 py-2">
                   {a.proveedorPredeterminado?.nombreProveedor || "—"}
                 </td>
-                <td className="text-center">
-                  <button
-                    onClick={() => {
-                      setArticuloSeleccionado(a);
-                      setModalAbierto(true);
+
+                <td className="px-4 py-2 text-center">
+                  <ArticuloActions
+                    onAsignar={() => {
+                      setArtSel(a);
+                      setModalPred(true);
                     }}
-                    className="bg-violet-600 px-4 py-2 rounded-xs font-medium text-white"
-                  >
-                    Modificar
-                  </button>
+                    onVerLista={() => {
+                      setArtSel(a);
+                      setModalLista(true);
+                    }}
+                  />
                 </td>
               </tr>
             ))}
@@ -108,14 +119,24 @@ export function ArticuloTable({ articulos }: Props) {
         </table>
       </div>
 
-      {modalAbierto && articuloSeleccionado && (
+      {/* ----------- Modal: Asignar proveedor predeterminado ----------- */}
+      {modalPred && artSel && (
         <ModificarArticulo
-          articulo={articuloSeleccionado}
-          cerrar={() => setModalAbierto(false)}
+          articulo={artSel}
+          cerrar={() => setModalPred(false)}
           alGuardar={() => {
-            console.log("Guardando articulo");
-            setModalAbierto(false);
+            setModalPred(false);
+            onGuardar(); // recargar desde la página
           }}
+        />
+      )}
+
+      {/* ----------- Modal: Lista de proveedores del artículo ---------- */}
+      {modalLista && artSel && (
+        <ListaProveedoresCard
+          articuloId={artSel.id}
+          nombreArticulo={artSel.nombreArticulo}
+          cerrar={() => setModalLista(false)}
         />
       )}
     </>

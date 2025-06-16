@@ -19,26 +19,40 @@ type Props = {
 
 const ModificarArticulo = ({ articulo, cerrar, alGuardar }: Props) => {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
-  const [proveedorId, setProveedorId] = useState<number | undefined>(articulo.proveedorPredeterminado?.id);
+  const [proveedorId, setProveedorId] = useState<number | undefined>(
+    articulo.proveedorPredeterminado?.id
+  );
 
   useEffect(() => {
-    fetch("http://localhost:3000/proveedores")
+    fetch(
+      `http://localhost:3000/articulos-proveedores/proveedores-por-articulo/${articulo.id}`
+    )
       .then((res) => res.json())
       .then(setProveedores)
       .catch(() => setProveedores([]));
-  }, []);
+  }, [articulo.id]);
 
   const handleGuardar = async () => {
     try {
-      await fetch(`http://localhost:3000/articulos/${articulo.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ proveedorPredeterminadoId: proveedorId }),
-      });
+      const res = await fetch(
+        `http://localhost:3000/articulos/${articulo.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ proveedorPredeterminadoId: proveedorId }),
+        }
+      );
 
-      alGuardar();
+      if (res.ok) {
+        alGuardar();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(`Error al guardar: ${err.message ?? "sin detalle"}`);
+        console.error("Error backend:", err);
+      }
     } catch (e) {
-      alert("Error al guardar");
+      alert("Error al guardar (sin conexión con backend)");
+      console.error(e);
     }
   };
 
@@ -49,7 +63,9 @@ const ModificarArticulo = ({ articulo, cerrar, alGuardar }: Props) => {
           Modificar proveedor de "{articulo.nombreArticulo}"
         </h2>
 
-        <label className="block mb-2 font-medium">Proveedor predeterminado</label>
+        <label className="block mb-2 font-medium">
+          Proveedor predeterminado
+        </label>
         <select
           value={proveedorId}
           onChange={(e) => setProveedorId(Number(e.target.value))}
@@ -64,10 +80,7 @@ const ModificarArticulo = ({ articulo, cerrar, alGuardar }: Props) => {
         </select>
 
         <div className="flex justify-end gap-4">
-          <button
-            onClick={cerrar}
-            className="text-gray-600 hover:underline"
-          >
+          <button onClick={cerrar} className="text-gray-600 hover:underline">
             Cancelar
           </button>
           <button
