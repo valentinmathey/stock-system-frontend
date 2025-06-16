@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-/* --------- Tipos --------- */
-type Articulo = {
-  id: number;
-  nombreArticulo: string;
-};
+/* ---------- Tipos ---------- */
+type Articulo = { id: number; nombreArticulo: string };
+type Relacion = { id: number; articulo: { id: number } };
 
 type Props = {
   proveedorId: number;
@@ -21,6 +19,7 @@ export default function ModificarProveedor({
   alGuardar,
 }: Props) {
   /* ---------- State ---------- */
+  const [articulos, setArticulos] = useState<Articulo[]>([]);
   const [formulario, setFormulario] = useState({
     nombreProveedor: "",
     articulo: {
@@ -33,60 +32,81 @@ export default function ModificarProveedor({
     },
   });
 
-  const [articulos, setArticulos] = useState<Articulo[]>([]);
-
   /* ---------- Carga inicial ---------- */
   useEffect(() => {
-    // proveedor
-    fetch(`http://localhost:3000/proveedores/${proveedorId}`)
-      .then((res) => res.json())
-      .then((data) =>
+    /* Relaciones de ESTE proveedor */
+    const relsPromise: Promise<Relacion[]> = fetch(
+      `http://localhost:3000/articulos-proveedores/por-proveedor/${proveedorId}`
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []);
+
+    /* Todos los artículos */
+    const artsPromise: Promise<Articulo[]> = fetch(
+      "http://localhost:3000/articulos"
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []);
+
+    /* Filtramos los que ya existen en la relación */
+    Promise.all([relsPromise, artsPromise])
+      .then(([rels, allArts]) => {
+        const usados = new Set<number>(rels.map((rel) => rel.articulo.id));
+        const disponibles = allArts.filter((a) => !usados.has(a.id));
+
+        setArticulos(disponibles);
+
+        /* Pre-selección si no había valor */
         setFormulario((prev) => ({
           ...prev,
-          nombreProveedor: data.nombreProveedor,
           articulo: {
             ...prev.articulo,
-            articuloId: data.articulos?.[0]?.id ?? 0,
+            articuloId: disponibles[0]?.id ?? 0,
           },
-        }))
-      );
-
-    // artículos
-    fetch("http://localhost:3000/articulos")
-      .then((res) => res.json())
-      .then(setArticulos)
+        }));
+      })
       .catch(() => setArticulos([]));
+
+    /* Nombre del proveedor */
+    fetch(`http://localhost:3000/proveedores/${proveedorId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(
+        (prov) =>
+          prov &&
+          setFormulario((prev) => ({
+            ...prev,
+            nombreProveedor: prov.nombreProveedor,
+          }))
+      );
   }, [proveedorId]);
 
   /* ---------- Handlers ---------- */
+  const numericFields = new Set([
+    "articuloId",
+    "costoPedido",
+    "costoCompraUnitarioArticulo",
+    "demoraEntregaProveedor",
+    "tiempoRevision",
+  ]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    const numeric = [
-      "articuloId",
-      "costoPedido",
-      "costoCompraUnitarioArticulo",
-      "demoraEntregaProveedor",
-      "tiempoRevision",
-    ];
 
     if (name in formulario.articulo) {
       setFormulario((prev) => {
-        const newArticulo: any = {
+        const next = {
           ...prev.articulo,
           [name]:
-            numeric.includes(name) && name !== "modeloInventario"
+            numericFields.has(name) && name !== "modeloInventario"
               ? Number(value)
               : value,
         };
-
-        // Si el usuario cambia a LOTE_FIJO, limpiamos tiempoRevision
         if (name === "modeloInventario" && value === "LOTE_FIJO") {
-          newArticulo.tiempoRevision = undefined;
+          next.tiempoRevision = undefined;
         }
-
-        return { ...prev, articulo: newArticulo };
+        return { ...prev, articulo: next };
       });
     } else {
       setFormulario((prev) => ({ ...prev, [name]: value }));
@@ -94,27 +114,23 @@ export default function ModificarProveedor({
   };
 
   /* ---------- Helpers ---------- */
+  const esTiempoFijo = formulario.articulo.modeloInventario === "TIEMPO_FIJO";
+
   const buildPayload = () => {
     const { articulo } = formulario;
-
-    const payload: any = {
+    return {
+      proveedorId,
       articuloId: articulo.articuloId,
-      proveedorId, // viene por props
       modeloInventario: articulo.modeloInventario,
       costoPedido: articulo.costoPedido,
       costoCompraUnitarioArticulo: articulo.costoCompraUnitarioArticulo,
       demoraEntregaProveedor: articulo.demoraEntregaProveedor,
+      ...(esTiempoFijo && { tiempoRevision: articulo.tiempoRevision }),
     };
-
-    if (articulo.modeloInventario === "TIEMPO_FIJO") {
-      payload.tiempoRevision = articulo.tiempoRevision;
-    }
-    return payload;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const res = await fetch("http://localhost:3000/articulos-proveedores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -126,16 +142,16 @@ export default function ModificarProveedor({
       cerrar();
     } else {
       const err = await res.json().catch(() => ({}));
-      alert(`Error al modificar proveedor: ${err.message ?? "sin detalle"}`);
+      alert(
+        `Error al modificar proveedor: ${err.message ?? "relación duplicada"}`
+      );
     }
   };
 
-  const esTiempoFijo = formulario.articulo.modeloInventario === "TIEMPO_FIJO";
-
   /* ---------- UI ---------- */
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center text-black">
-      <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-8 z-50 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 z-40 flex items-center justify-center text-black">
+      <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-8">
         <h2 className="text-2xl font-bold mb-6 text-center">
           Modificar proveedor
         </h2>
@@ -144,15 +160,13 @@ export default function ModificarProveedor({
           onSubmit={handleSubmit}
           className="grid grid-cols-2 gap-x-6 gap-y-4"
         >
-          {/* Nombre */}
+          {/* Nombre (solo lectura) */}
           <label className="font-medium">Nombre</label>
           <input
             type="text"
-            name="nombreProveedor"
             value={formulario.nombreProveedor}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            disabled
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
           />
 
           {/* Artículo */}
@@ -179,7 +193,6 @@ export default function ModificarProveedor({
             value={formulario.articulo.modeloInventario}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
-            required
           >
             <option value="LOTE_FIJO">Lote Fijo</option>
             <option value="TIEMPO_FIJO">Tiempo Fijo</option>
@@ -201,8 +214,8 @@ export default function ModificarProveedor({
             type="number"
             name="costoCompraUnitarioArticulo"
             value={formulario.articulo.costoCompraUnitarioArticulo}
-            required
             onChange={handleChange}
+            required
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
@@ -216,7 +229,7 @@ export default function ModificarProveedor({
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
-          {/* Tiempo de revisión (solo TIEMPO_FIJO) */}
+          {/* Tiempo de revisión */}
           {esTiempoFijo && (
             <>
               <label className="font-medium">Tiempo de Revisión</label>
@@ -225,9 +238,9 @@ export default function ModificarProveedor({
                 name="tiempoRevision"
                 value={formulario.articulo.tiempoRevision ?? ""}
                 onChange={handleChange}
+                min={1}
                 required
                 className="w-full border border-gray-300 rounded px-3 py-2"
-                min={1}
               />
             </>
           )}
@@ -236,8 +249,8 @@ export default function ModificarProveedor({
           <div className="col-span-2 flex justify-end gap-4 pt-4">
             <button
               type="button"
-              className="text-gray-600 hover:underline"
               onClick={cerrar}
+              className="text-gray-600 hover:underline"
             >
               Cancelar
             </button>

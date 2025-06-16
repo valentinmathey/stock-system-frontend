@@ -70,69 +70,69 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center text-black">
-      <div className="bg-white w-full max-w-4xl rounded-lg shadow-lg p-8 z-50 max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center
+                 bg-black/60 text-black"
+    >
+      <div className="bg-white w-full max-w-4xl rounded-lg shadow-lg p-8 max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-6 text-center">Nuevo artículo</h2>
+
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-2 gap-x-6 gap-y-4"
         >
           <GesProInputText
             name="codigoArticulo"
-            handleChange={handleChange}
             label="Código"
+            handleChange={handleChange}
           />
-
           <GesProInputText
             name="nombreArticulo"
             label="Nombre"
             handleChange={handleChange}
             required
           />
-
           <GesProInputText
             name="descripcionArticulo"
+            label="Descripción"
             handleChange={handleChange}
             required={false}
-            label="Descripción"
           />
 
           <GesProInputNumber
             name="precioVentaUnitarioArticulo"
-            handleChange={handleChange}
             label="Precio Venta ($)"
+            handleChange={handleChange}
           />
-
           <GesProInputNumber
             name="costoAlmacenamientoPorUnidad"
             label="Costo almacenamiento ($)"
             handleChange={handleChange}
             required
           />
-
           <GesProInputNumber
             name="stockActual"
-            handleChange={handleChange}
             label="Stock Actual"
+            handleChange={handleChange}
           />
-
           <GesProInputNumber
             name="stockSeguridad"
-            handleChange={handleChange}
             label="Stock Seguridad"
+            handleChange={handleChange}
           />
-
           <GesProInputNumber
             name="demandaAnual"
             label="Demanda anual"
             handleChange={handleChange}
           />
+
+          {/* Selector de proveedor */}
           <label className="font-medium">Proveedor</label>
           <select
             name="proveedorPredeterminadoId"
             value={formulario.proveedorPredeterminadoId}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="col-span-2 border border-gray-300 rounded px-3 py-2"
           >
             <option value="">Seleccioná un proveedor</option>
             {proveedores.map((p) => (
@@ -142,11 +142,12 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             ))}
           </select>
 
+          {/* Botones */}
           <div className="col-span-2 flex justify-end gap-4 pt-4">
             <button
               type="button"
-              className="text-gray-600 hover:underline"
               onClick={cerrar}
+              className="text-gray-600 hover:underline"
             >
               Cancelar
             </button>

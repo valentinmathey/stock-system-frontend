@@ -1,62 +1,61 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { MoreVertical, Plus, List as ListIcon, X } from "lucide-react";
 
 type Props = {
-  onAsignar: () => void; // abre el modal de “Asignar proveedor”
-  onVerLista: () => void; // abre el modal de “Ver lista”
+  onAgregarArticulo: () => void;
+  onVerLista: () => void;
 };
 
-export default function ArticuloActions({ onAsignar, onVerLista }: Props) {
+export default function ProviderActions({
+  onAgregarArticulo,
+  onVerLista,
+}: Props) {
   const [open, setOpen] = useState(false);
 
-  /* Cierra si se hace clic fuera de la tarjeta */
-  const handleBackdrop = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  /* backdrop click = cerrar */
+  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.currentTarget === e.target) setOpen(false);
-  }, []);
+  };
 
   return (
     <>
-      {/* Botón disparador */}
       <button
         onClick={() => setOpen(true)}
-        className="bg-violet-600 text-white px-3 py-1.5 rounded font-medium
+        className="bg-violet-600 text-white px-3 py-1.5 rounded
                    inline-flex items-center gap-1"
       >
         Acciones
-        <MoreVertical size={14} className="shrink-0" />
+        <MoreVertical size={14} />
       </button>
 
-      {/* Overlay + popup */}
       {open && (
         <div
+          className="fixed inset-0 z-40 bg-black/60 flex items-center justify-center"
           onClick={handleBackdrop}
-          className="fixed inset-0 z-40 flex items-center justify-center
-                     bg-black/60 "
         >
           <div className="bg-white rounded-lg shadow-xl w-64 p-4">
-            {/* Cabecera */}
+            {/* header */}
             <div className="flex justify-between items-center mb-3">
               <span className="font-semibold">Acciones</span>
               <button
-                onClick={() => setOpen(false)}
                 className="text-gray-500 hover:text-gray-700"
+                onClick={() => setOpen(false)}
               >
                 <X size={18} />
               </button>
             </div>
 
-            {/* Opciones */}
             <button
               onClick={() => {
                 setOpen(false);
-                onAsignar();
+                onAgregarArticulo();
               }}
               className="flex w-full items-center gap-2 px-3 py-2 rounded
                          hover:bg-gray-100 text-sm"
             >
-              <Plus size={16} /> Asignar proveedor
+              <Plus size={16} /> Agregar artículo
             </button>
 
             <button
