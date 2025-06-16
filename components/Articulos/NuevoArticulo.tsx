@@ -123,32 +123,6 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
           />
 
           <GesProInputNumber
-            name="loteOptimo"
-            handleChange={handleChange}
-            label="Lote óptimo"
-            required={false}
-          />
-          <GesProInputNumber
-            name="cgi"
-            handleChange={handleChange}
-            label="CGI"
-            required={false}
-          />
-
-          <GesProInputNumber
-            name="puntoPedido"
-            handleChange={handleChange}
-            label="Punto de pedido"
-            required={false}
-          />
-
-          <GesProInputNumber
-            name="inventarioMaximo"
-            label="Inventario máximo"
-            handleChange={handleChange}
-          />
-
-          <GesProInputNumber
             name="demandaAnual"
             label="Demanda anual"
             handleChange={handleChange}
