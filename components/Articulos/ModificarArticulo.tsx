@@ -24,13 +24,24 @@ const ModificarArticulo = ({ articulo, cerrar, alGuardar }: Props) => {
   );
 
   useEffect(() => {
-    fetch(
-      `http://localhost:3000/articulos-proveedores/proveedores-por-articulo/${articulo.id}`
-    )
-      .then((res) => res.json())
-      .then(setProveedores)
-      .catch(() => setProveedores([]));
-  }, [articulo.id]);
+  fetch(
+    `http://localhost:3000/articulos-proveedores/proveedores-por-articulo/${articulo.id}`
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setProveedores(data);
+      } else {
+        console.warn("Respuesta inesperada:", data);
+        setProveedores([]);
+      }
+    })
+    .catch((err) => {
+      console.error("Error al cargar proveedores:", err);
+      setProveedores([]);
+    });
+}, [articulo.id]);
+
 
   const handleGuardar = async () => {
     try {
