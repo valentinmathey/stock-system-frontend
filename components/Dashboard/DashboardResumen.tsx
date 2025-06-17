@@ -1,105 +1,77 @@
 // components/Dashboard/DashboardResumen.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { Box, TriangleAlert, FileClock, DollarSign, Flame } from "lucide-react";
+import {
+  Box,
+  TriangleAlert,
+  ShieldAlert,
+  FileClock,
+  DollarSign,
+} from "lucide-react";
 
-export function DashboardResumen() {
-  const [resumen, setResumen] = useState({
-    totalArticulos: 0,
-    bajoStock: 0,
-    ordenesPendientes: 0,
-    ultimaVenta: "$0",
-  });
+interface DashboardResumenProps {
+  totalArticulos: number;
+  bajoPuntoPedido: number;
+  enStockSeguridad: number;
+  ordenesPendientes: number;
+  ultimaVenta: string;            
+}
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [articulos, bajoStock, ordenes, ventas] = await Promise.all([
-          fetch("http://localhost:3000/articulos").then((r) => r.json()),
-          fetch("http://localhost:3000/articulos/stockBajo").then((r) =>
-            r.json()
-          ),
-          fetch("http://localhost:3000/ordenes-compra").then((r) => r.json()),
-          fetch("http://localhost:3000/ventas").then((r) => r.json()),
-        ]);
-
-        const ultima = ventas.length
-          ? `$${(
-              ventas.sort(
-                (a: any, b: any) =>
-                  new Date(b.fechaVenta).getTime() -
-                  new Date(a.fechaVenta).getTime()
-              )[0] as any
-            ).total.toLocaleString()}`
-          : "$0";
-
-        setResumen({
-          totalArticulos: articulos.length,
-          bajoStock: bajoStock.length,
-          ordenesPendientes: ordenes.length,
-          ultimaVenta: ultima,
-        });
-      } catch (e) {
-        console.error("Error al cargar resumen:", e);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+export function DashboardResumen({
+  totalArticulos,
+  bajoPuntoPedido,
+  enStockSeguridad,
+  ordenesPendientes,
+  ultimaVenta,
+}: DashboardResumenProps) {
   const tarjetas = [
     {
-      icono: <Box className="text-black" />,
+      icono: Box,
       label: "Total de artículos",
-      valor: resumen.totalArticulos,
-      texto: "text-black",
-      fondo: "#A5F7E1",
+      valor: totalArticulos,
+      bg: "#A5F7E1",
     },
     {
-      icono: <TriangleAlert className="text-black" />,
+      icono: TriangleAlert,
       label: "Bajo punto de pedido",
-      valor: resumen.bajoStock,
-      texto: "text-black",
-      fondo: "#FEE5A5",
+      valor: bajoPuntoPedido,
+      bg: "#FEE5A5",
     },
     {
-      icono: <Flame className="text-black" />,
+      icono: ShieldAlert,
       label: "En stock de seguridad",
-      valor: resumen.bajoStock,
-      texto: "text-black",
-      fondo: "#F2A7A7",
+      valor: enStockSeguridad,
+      bg: "#F2A7A7",
     },
     {
-      icono: <FileClock className="text-black" />,
+      icono: FileClock,
       label: "OC pendientes",
-      valor: resumen.ordenesPendientes,
-      texto: "text-black",
-      fondo: "#AAA7F2",
+      valor: ordenesPendientes,
+      bg: "#AAA7F2",
     },
     {
-      icono: <DollarSign className="text-black" />,
+      icono: DollarSign,
       label: "Última venta",
-      valor: resumen.ultimaVenta,
-      texto: "text-black",
-      fondo: "#B1F2A7",
+      valor: ultimaVenta,
+      bg: "#B1F2A7",
     },
-  ];
+  ] as const;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      {tarjetas.map((t, i) => (
+      {tarjetas.map(({ icono: Icon, label, valor, bg }) => (
         <div
-          key={i}
-          className={`flex items-center gap-4 p-4 rounded-xl shadow ${t.texto}`}
-          style={{ backgroundColor: t.fondo }}
+          key={label}
+          className="flex items-center gap-4 p-4 rounded-xl shadow text-black"
+          style={{ backgroundColor: bg }}
         >
-          <div className="bg-white rounded-full p-2 shadow-md">{t.icono}</div>
+          <div className="bg-white rounded-full p-2 shadow">
+            <Icon size={18} />
+          </div>
+
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide">
-              {t.label}
-            </p>
-            <p className="text-xl font-bold">{t.valor}</p>
+            <p className="text-xs uppercase tracking-wide">{label}</p>
+            <p className="text-xl font-bold">{valor}</p>
           </div>
         </div>
       ))}
