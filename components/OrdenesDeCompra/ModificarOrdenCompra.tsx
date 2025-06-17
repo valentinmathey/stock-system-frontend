@@ -194,7 +194,7 @@ export function ModificarOrdenCompra({
               {/* Cancelar */}
               <button
                 onClick={cancelar}
-                className="text-red-600 hover:underline"
+                className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700"
               >
                 Cancelar orden
               </button>
