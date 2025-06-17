@@ -1,39 +1,85 @@
 "use client";
 
+import { useState } from "react";
+import { ModificarOrdenCompra } from "./ModificarOrdenCompra";
+
+type EstadoOrdenCompra = {
+  id: number;
+  codigoEstadoOrdenCompra: string;
+  nombreEstadoOrdenCompra: string;
+  fechaBajaEstadoOrdenCompra: string | null;
+};
+
 type OrdenCompra = {
   id: number;
-  fechaOrden: string;
+  fechaOrdenCompra: string;
   proveedor: { nombreProveedor: string };
-  total: number;
+  costoTotal: number;
+  estado: EstadoOrdenCompra; 
 };
 
 type Props = {
   ordenes: OrdenCompra[];
+  alGuardar: () => void; 
 };
 
-export function OrdenDeCompraCard({ ordenes }: Props) {
+export function OrdenDeCompraCard({ ordenes, alGuardar }: Props) {
+  const [ordenSeleccionada, setOrdenSeleccionada] = useState<number | null>(
+    null
+  );
+
   return (
     <div className="w-full overflow-x-auto rounded shadow bg-white">
-      <table className="w-full text-sm text-gray-700">
-        <thead className="bg-gray-100 text-xs text-gray-600 uppercase">
-          <tr>
-            <th className="px-4 py-3 text-left">ID</th>
-            <th className="px-4 py-3 text-left">Fecha</th>
-            <th className="px-4 py-3 text-left">Proveedor</th>
-            <th className="px-4 py-3 text-right">Total ($)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ordenes.map((o) => (
-            <tr key={o.id} className="border-b hover:bg-gray-50">
-              <td className="px-4 py-2">{o.id}</td>
-              <td className="px-4 py-2">{o.fechaOrden}</td>
-              <td className="px-4 py-2">{o.proveedor.nombreProveedor}</td>
-              <td className="px-4 py-2 text-right">${o.total.toFixed(2)}</td>
+      <div className="overflow-x-auto rounded-lg shadow">
+        <table className="min-w-full text-sm text-gray-700">
+          <thead className="bg-gray-100 text-xs uppercase text-gray-600">
+            <tr>
+              <th className="px-4 py-3 text-center">ID</th>
+              <th className="px-4 py-3 text-center">Fecha</th>
+              <th className="px-4 py-3 text-center">Proveedor</th>
+              <th className="px-4 py-3 text-center">Total ($)</th>
+              <th className="px-4 py-3 text-center">Estado</th>
+              <th className="px-4 py-3 text-center">Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {ordenes.map((o) => (
+              <tr key={o.id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-2 text-center">{o.id}</td>
+                <td className="px-4 py-2 text-center">{o.fechaOrdenCompra}</td>
+                <td className="px-4 py-2 text-center">
+                  {o.proveedor.nombreProveedor}
+                </td>
+                <td className="px-4 py-2 text-center">
+                  $ {o.costoTotal != null ? o.costoTotal.toFixed(2) : "-"}
+                </td>
+                <td className="px-4 py-2 text-center">
+                  {o.estado?.nombreEstadoOrdenCompra ?? "-"}
+                </td>
+                <td className="px-4 py-2 text-center">
+                  <button
+                    onClick={() => setOrdenSeleccionada(o.id)}
+                    className="text-white px-4 py-2 bg-violet-600 hover:bg-violet-700"
+                  >
+                    Modificar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {ordenSeleccionada !== null && (
+        <ModificarOrdenCompra
+          ordenCompraId={ordenSeleccionada}
+          cerrar={() => setOrdenSeleccionada(null)}
+          alGuardar={() => {
+            setOrdenSeleccionada(null);
+            alGuardar();
+          }}
+        />
+      )}
     </div>
   );
 }

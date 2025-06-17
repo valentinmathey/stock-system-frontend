@@ -63,15 +63,18 @@ export default function OrdenesPage() {
           </button>
         </div>
 
-        <OrdenDeCompraCard ordenes={ordenesFiltradas} />
+        <OrdenDeCompraCard
+          ordenes={ordenesFiltradas}
+          alGuardar={cargarOrdenes}
+        />
       </div>
 
       {modalAbierto && (
         <NuevaOrdenCompra
           cerrar={() => setModalAbierto(false)}
           alGuardar={() => {
+            cargarOrdenes(); // esta sí está definida acá
             setModalAbierto(false);
-            cargarOrdenes();
           }}
         />
       )}

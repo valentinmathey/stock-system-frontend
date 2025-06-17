@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+// Tipos
+
 type Props = {
   cerrar: () => void;
   alGuardar: () => void;
@@ -10,6 +12,8 @@ type Props = {
 type Articulo = {
   id: number;
   nombreArticulo: string;
+  loteOptimo?: number;
+  proveedorPredeterminado?: { id: number; nombreProveedor: string };
 };
 
 type Proveedor = {
@@ -19,7 +23,9 @@ type Proveedor = {
 
 export function NuevaOrdenCompra({ cerrar, alGuardar }: Props) {
   const [articulos, setArticulos] = useState<Articulo[]>([]);
-  const [proveedoresArticulo, setProveedoresArticulo] = useState<Proveedor[]>([]);
+  const [proveedoresArticulo, setProveedoresArticulo] = useState<Proveedor[]>(
+    []
+  );
   const [formulario, setFormulario] = useState({
     fechaOrdenCompra: new Date().toISOString().split("T")[0],
     articuloId: 0,
@@ -30,26 +36,67 @@ export function NuevaOrdenCompra({ cerrar, alGuardar }: Props) {
   useEffect(() => {
     fetch("http://localhost:3000/articulos")
       .then((res) => res.json())
-      .then(setArticulos)
+      .then((data) => {
+        if (Array.isArray(data)) setArticulos(data);
+        else setArticulos([]);
+      })
       .catch(() => setArticulos([]));
   }, []);
 
-useEffect(() => {
-  if (formulario.articuloId) {
-    fetch(`http://localhost:3000/articulos/${formulario.articuloId}/proveedores?id=${formulario.articuloId}`)
+  useEffect(() => {
+    if (formulario.articuloId === 0) return;
+
+    const art = articulos.find((a) => a.id === formulario.articuloId);
+    if (!art) return;
+
+    const proveedorSugeridoId = art.proveedorPredeterminado?.id ?? 0;
+    const loteSugerido = art.loteOptimo ?? 1;
+
+    // Cargar proveedores del artículo
+    fetch(`http://localhost:3000/articulos/${art.id}/proveedores`)
       .then((res) => res.json())
       .then((data) => {
-        // aseguramos que sea un array antes de setear
-        if (Array.isArray(data)) {
-          setProveedoresArticulo(data);
-        } else {
-          setProveedoresArticulo([]);
+        let lista = Array.isArray(data) ? data : [];
+        const existe = lista.some((p) => p.id === proveedorSugeridoId);
+        if (!existe && art.proveedorPredeterminado) {
+          lista.push(art.proveedorPredeterminado);
         }
+        setProveedoresArticulo(lista);
       })
       .catch(() => setProveedoresArticulo([]));
-  }
-}, [formulario.articuloId]);
 
+    // Sugerir proveedor y lote
+    setFormulario((prev) => ({
+      ...prev,
+      proveedorId: proveedorSugeridoId,
+      detalles: [
+        {
+          articuloId: art.id,
+          cantidadArticulo: loteSugerido,
+        },
+      ],
+    }));
+
+    // Verificar si existe OC activa para artículo + proveedor sugerido
+    fetch("http://localhost:3000/ordenes-compra")
+      .then((res) => res.json())
+      .then((ordenes) => {
+        const tieneActiva = ordenes.some(
+          (oc: any) =>
+            oc.proveedor.id === proveedorSugeridoId &&
+            oc.detallesOrden.some((d: any) => d.articulo.id === art.id) &&
+            ["PENDIENTE", "CONFIRMADA"].includes(
+              oc.estado.codigoEstadoOrdenCompra
+            )
+        );
+
+        if (tieneActiva) {
+          alert(
+            "⚠️ Ya existe una orden activa para este artículo con ese proveedor"
+          );
+        }
+      });
+  }, [formulario.articuloId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -58,7 +105,6 @@ useEffect(() => {
     setFormulario((prev) => ({
       ...prev,
       [name]: name === "fechaOrdenCompra" ? value : Number(value),
-      detalles: name === "articuloId" ? [{ articuloId: Number(value), cantidadArticulo: 1 }] : prev.detalles,
     }));
   };
 
@@ -74,51 +120,65 @@ useEffect(() => {
   const agregarArticulo = () => {
     setFormulario((prev) => ({
       ...prev,
-      detalles: [...prev.detalles, { articuloId: formulario.articuloId, cantidadArticulo: 1 }],
+      detalles: [
+        ...prev.detalles,
+        { articuloId: formulario.articuloId, cantidadArticulo: 1 },
+      ],
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Validación previa
-  if (
-    formulario.proveedorId === 0 ||
-    formulario.detalles.length === 0 ||
-    formulario.detalles.some(
-      (d) => d.articuloId === 0 || d.cantidadArticulo <= 0
-    )
-  ) {
-    alert("Completá todos los campos antes de guardar.");
-    return;
-  }
+    if (
+      formulario.proveedorId === 0 ||
+      formulario.detalles.length === 0 ||
+      formulario.detalles.some(
+        (d) => d.articuloId === 0 || d.cantidadArticulo <= 0
+      )
+    ) {
+      alert("Completá todos los campos antes de guardar.");
+      return;
+    }
 
-  const payload = {
-    fechaOrdenCompra: formulario.fechaOrdenCompra,
-    proveedorId: formulario.proveedorId,
-    detalles: formulario.detalles,
+    const payload = {
+      fechaOrdenCompra: formulario.fechaOrdenCompra,
+      proveedorId: formulario.proveedorId,
+      detalles: formulario.detalles,
+    };
+
+    const res = await fetch("http://localhost:3000/ordenes-compra", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert("✅ Orden registrada correctamente");
+      alGuardar();
+      cerrar();
+    } else {
+      alert("❌ Error:\n" + (data.message || "Error desconocido"));
+    }
+
+    if (res.ok) {
+      alGuardar();
+      cerrar();
+    } else {
+      alert("Error al registrar la orden de compra");
+    }
   };
 
-
-  const res = await fetch("http://localhost:3000/ordenes-compra", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (res.ok) {
-    alGuardar();
-    cerrar();
-  } else {
-    alert("Error al registrar la orden de compra");
-  }
-};
-
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center text-black">
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center
+                 bg-black/60 text-black"
+    >
       <div className="bg-white w-full max-w-2xl rounded-lg shadow-lg p-6 z-50 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4 text-center">Nueva orden de compra</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Nueva orden de compra
+        </h2>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <label className="font-medium">Fecha</label>
           <input
@@ -188,13 +248,13 @@ useEffect(() => {
             </div>
           ))}
 
-          <button
+          {/* <button
             type="button"
             onClick={agregarArticulo}
             className="text-blue-600 hover:underline text-sm"
           >
             + Agregar otro artículo
-          </button>
+          </button> */}
 
           <div className="flex justify-end gap-4 pt-4">
             <button
