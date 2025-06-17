@@ -10,6 +10,7 @@ type Venta = { id: number; fechaVenta: string; total: number };
 type Orden = {
   id: number;
   fechaOrdenCompra: string;
+  costoTotal:number;
   detalles?: { cantidadArticulo: number }[];
 };
 
@@ -141,7 +142,7 @@ export function DashboardContenido() {
             <thead className="text-xs text-gray-600 uppercase bg-gray-50">
               <tr>
                 <th className="py-2 px-2 text-left">Fecha</th>
-                <th className="py-2 px-2 text-right">Ítems totales</th>
+                <th className="py-2 px-2 text-right">Total($)</th>
               </tr>
             </thead>
             <tbody>
@@ -151,8 +152,7 @@ export function DashboardContenido() {
                     {o.fechaOrdenCompra.split("T")[0]}
                   </td>
                   <td className="py-1.5 px-2 text-right">
-                    {o.detalles?.reduce((s, d) => s + d.cantidadArticulo, 0) ??
-                      0}
+                  $ {o.costoTotal != null ? o.costoTotal.toFixed(2) : "-"}
                   </td>
                 </tr>
               ))}

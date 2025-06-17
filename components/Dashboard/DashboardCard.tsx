@@ -1,18 +1,27 @@
+// components/Dashboard/DashboardCard.tsx
 "use client";
+import { ReactNode } from "react";
 
-import { PropsWithChildren } from "react";
-
-interface DashboardCardProps extends PropsWithChildren {
-  /** Título que aparece arriba de la tarjeta */
+export function DashboardCard({
+  titulo,
+  children,
+}: {
   titulo: string;
-}
-
-export function DashboardCard({ titulo, children }: DashboardCardProps) {
+  children: ReactNode;
+}) {
   return (
-    <div className="bg-white rounded-lg shadow p-4 text-black">
-      <h3 className="text-lg font-semibold mb-2">{titulo}</h3>
+    <section
+      className="group rounded-3xl bg-white shadow-lg ring-1 ring-black/5
+                 p-6 flex flex-col gap-4 transition
+                 hover:-translate-y-1 hover:shadow-2xl text-black"
+    >
+      <h3 className="text-lg font-bold tracking-tight text-gray-800
+                     flex items-center gap-2 after:flex-1 after:h-px after:bg-gray-200">
+        {titulo}
+      </h3>
 
+      {/* contenido */}
       <div className="overflow-x-auto">{children}</div>
-    </div>
+    </section>
   );
 }
