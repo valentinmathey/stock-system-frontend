@@ -65,6 +65,8 @@ export function DashboardContenido() {
         v.sort((x, y) => new Date(y.fechaVenta).getTime()       - new Date(x.fechaVenta).getTime());
         o.sort((x, y) => new Date(y.fechaOrdenCompra).getTime() - new Date(x.fechaOrdenCompra).getTime());
         a.sort((x, y) => new Date(y.fechaAlta ?? 0).getTime()   - new Date(x.fechaAlta ?? 0).getTime());
+        r.sort((a, b) => a.stockActual - b.stockActual);
+        f.sort((a, b) => a.stockActual - b.stockActual);
 
         setVentas(v);
         setOrdenes(o);
