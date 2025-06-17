@@ -44,7 +44,9 @@ export function Sidebar() {
   return (
     <aside className="w-70 h-screen bg-white shadow-md p-4 flex flex-col justify-between text-black">
       <div>
-        <h2 className="text-2xl font-bold mb-8">GESPRO</h2>
+        <Link href="/" className="block">
+          <h2 className="text-2xl font-bold mb-8 cursor-pointer">GESPRO</h2>
+        </Link>
         <nav className="space-y-4">
           <SidebarItem
             label="Dashboard"
