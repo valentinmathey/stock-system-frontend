@@ -217,7 +217,7 @@ export function ModificarOrdenCompra({
           {esConfirmada && (
             <button
               onClick={finalizar}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mx-auto"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mx-auto"
             >
               Finalizar orden
             </button>

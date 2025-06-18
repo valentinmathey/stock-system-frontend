@@ -61,9 +61,9 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
           <tbody>
             {articulos.map((a) => (
               <tr key={a.id} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-2">{a.codigoArticulo}</td>
-                <td className="px-4 py-2 font-medium">{a.nombreArticulo}</td>
-                <td className="px-4 py-2">{a.descripcionArticulo}</td>
+                <td className="px-4 py-2 text-center">{a.codigoArticulo}</td>
+                <td className="px-4 py-2 font-medium text-center">{a.nombreArticulo}</td>
+                <td className="px-4 py-2 text-center">{a.descripcionArticulo}</td>
 
                 <td
                   className={`px-4 py-2 text-center font-bold ${

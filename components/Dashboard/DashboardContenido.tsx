@@ -5,12 +5,17 @@ import { DashboardCard } from "./DashboardCard";
 import { DashboardResumen } from "./DashboardResumen";
 
 /* ---------- Modelos ---------- */
-type Venta = { id: number; fechaVenta: string; total: number };
+type Venta = {
+  id: number;
+  fechaVenta: string;
+  ventaTotal: number;
+};
 
 type Orden = {
   id: number;
   fechaOrdenCompra: string;
-  costoTotal:number;
+  costoTotal: number;
+  estado: { codigoEstadoOrdenCompra: string };
   detalles?: { cantidadArticulo: number }[];
 };
 
@@ -28,49 +33,65 @@ type Articulo = {
 /* ================================================================= */
 export function DashboardContenido() {
   /* ---- estados ---- */
-  const [ventas, setVentas]           = useState<Venta[]>([]);
-  const [ordenes, setOrdenes]         = useState<Orden[]>([]);
-  const [articulos, setArticulos]     = useState<Articulo[]>([]);
-  const [reponer, setReponer]         = useState<Articulo[]>([]);
-  const [faltantes, setFaltantes]     = useState<Articulo[]>([]);
-  const [topStock, setTopStock]       = useState<Articulo[]>([]);   //  ✅ ahora dentro
+  const [ventas, setVentas] = useState<Venta[]>([]);
+  const [ordenes, setOrdenes] = useState<Orden[]>([]);
+  const [ordenesPendientes, setOrdenesPendientes] = useState<Orden[]>([]);
+  const [articulos, setArticulos] = useState<Articulo[]>([]);
+  const [reponer, setReponer] = useState<Articulo[]>([]);
+  const [faltantes, setFaltantes] = useState<Articulo[]>([]);
+  const [topStock, setTopStock] = useState<Articulo[]>([]);
 
   /* ---- carga inicial ---- */
   useEffect(() => {
     const cargar = async () => {
       try {
-        const [
-          ventasR,
-          ordenesR,
-          artsR,
-          repoR,
-          faltR,
-          topStockR,
-        ] = await Promise.all([
-          fetch("http://localhost:3000/ventas").then(r => r.json()),
-          fetch("http://localhost:3000/ordenes-compra").then(r => r.json()),
-          fetch("http://localhost:3000/articulos").then(r => r.json()),
-          fetch("http://localhost:3000/articulos/paraReponer").then(r => r.json()),
-          fetch("http://localhost:3000/articulos/stockBajo").then(r => r.json()),
-          fetch("http://localhost:3000/articulos/top-stock?limit=5").then(r => r.json()),
-        ]);
+        const [ventasR, ordenesR, artsR, repoR, faltR, topStockR] =
+          await Promise.all([
+            fetch("http://localhost:3000/ventas").then((r) => r.json()),
+            fetch("http://localhost:3000/ordenes-compra").then((r) => r.json()),
+            fetch("http://localhost:3000/articulos").then((r) => r.json()),
+            fetch("http://localhost:3000/articulos/paraReponer").then((r) =>
+              r.json()
+            ),
+            fetch("http://localhost:3000/articulos/stockBajo").then((r) =>
+              r.json()
+            ),
+            fetch("http://localhost:3000/articulos/top-stock?limit=5").then(
+              (r) => r.json()
+            ),
+          ]);
 
         /* fuerza a arrays y ordena donde hace falta */
-        const v = Array.isArray(ventasR)   ? ventasR   : [];
-        const o = Array.isArray(ordenesR)  ? ordenesR  : [];
-        const a = Array.isArray(artsR)     ? artsR     : [];
-        const r = Array.isArray(repoR)     ? repoR     : [];
-        const f = Array.isArray(faltR)     ? faltR     : [];
+        const v = Array.isArray(ventasR) ? ventasR : [];
+        const o = Array.isArray(ordenesR) ? ordenesR : [];
+        const op = o.filter(
+          (oc) => oc.estado?.codigoEstadoOrdenCompra === "PENDIENTE"
+        );
+        const a = Array.isArray(artsR) ? artsR : [];
+        const r = Array.isArray(repoR) ? repoR : [];
+        const f = Array.isArray(faltR) ? faltR : [];
         const t = Array.isArray(topStockR) ? topStockR : [];
 
-        v.sort((x, y) => new Date(y.fechaVenta).getTime()       - new Date(x.fechaVenta).getTime());
-        o.sort((x, y) => new Date(y.fechaOrdenCompra).getTime() - new Date(x.fechaOrdenCompra).getTime());
-        a.sort((x, y) => new Date(y.fechaAlta ?? 0).getTime()   - new Date(x.fechaAlta ?? 0).getTime());
+        v.sort(
+          (x, y) =>
+            new Date(y.fechaVenta).getTime() - new Date(x.fechaVenta).getTime()
+        );
+        o.sort(
+          (x, y) =>
+            new Date(y.fechaOrdenCompra).getTime() -
+            new Date(x.fechaOrdenCompra).getTime()
+        );
+        a.sort(
+          (x, y) =>
+            new Date(y.fechaAlta ?? 0).getTime() -
+            new Date(x.fechaAlta ?? 0).getTime()
+        );
         r.sort((a, b) => a.stockActual - b.stockActual);
         f.sort((a, b) => a.stockActual - b.stockActual);
 
         setVentas(v);
         setOrdenes(o);
+        setOrdenesPendientes(op);
         setArticulos(a);
         setReponer(r);
         setFaltantes(f);
@@ -84,7 +105,7 @@ export function DashboardContenido() {
   }, []);
 
   /* ---- datos para la tira-resumen ---- */
-  const ultimoTotal = ventas[0]?.total ?? 0;
+  const ultimoTotal = ventas[0]?.ventaTotal ?? 0;
   const ultimaVentaUSD = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -99,7 +120,7 @@ export function DashboardContenido() {
         totalArticulos={articulos.length}
         bajoPuntoPedido={reponer.length}
         enStockSeguridad={faltantes.length}
-        ordenesPendientes={ordenes.length}
+        ordenesPendientes={ordenesPendientes.length}
         ultimaVenta={ultimaVentaUSD}
       />
 
@@ -110,16 +131,16 @@ export function DashboardContenido() {
           <table className="min-w-full text-sm">
             <thead className="text-xs text-gray-600 uppercase bg-gray-50">
               <tr>
-                <th className="py-2 px-2 text-left">Fecha</th>
-                <th className="py-2 px-2 text-right">Total ($)</th>
+                <th className="py-2 px-2 text-center">Fecha</th>
+                <th className="py-2 px-2 text-center">Total ($)</th>
               </tr>
             </thead>
             <tbody>
               {ventas.slice(0, 5).map((v) => (
                 <tr key={v.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2">{v.fechaVenta.split("T")[0]}</td>
-                  <td className="py-1.5 px-2 text-right">
-                    {v.total.toLocaleString("en-US", {
+                  <td className="py-1.5 px-2 text-center">{v.fechaVenta.split("T")[0]}</td>
+                  <td className="py-1.5 px-2 text-center">
+                    {v.ventaTotal.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                     })}
                   </td>
@@ -141,18 +162,18 @@ export function DashboardContenido() {
           <table className="min-w-full text-sm">
             <thead className="text-xs text-gray-600 uppercase bg-gray-50">
               <tr>
-                <th className="py-2 px-2 text-left">Fecha</th>
-                <th className="py-2 px-2 text-right">Total($)</th>
+                <th className="py-2 px-2 text-center">Fecha</th>
+                <th className="py-2 px-2 text-center">Total($)</th>
               </tr>
             </thead>
             <tbody>
               {ordenes.slice(0, 5).map((o) => (
                 <tr key={o.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2">
+                  <td className="py-1.5 px-2 text-center">
                     {o.fechaOrdenCompra.split("T")[0]}
                   </td>
-                  <td className="py-1.5 px-2 text-right">
-                  $ {o.costoTotal != null ? o.costoTotal.toFixed(2) : "-"}
+                  <td className="py-1.5 px-2 text-center">
+                    $ {o.costoTotal != null ? o.costoTotal.toFixed(2) : "-"}
                   </td>
                 </tr>
               ))}
@@ -172,19 +193,19 @@ export function DashboardContenido() {
           <table className="min-w-full text-sm">
             <thead className="text-xs text-gray-600 uppercase bg-gray-50">
               <tr>
-                <th className="py-2 px-2 text-left">Código</th>
-                <th className="py-2 px-2 text-left">Fecha alta</th>
-                <th className="py-2 px-2 text-left">Proveedor</th>
+                <th className="py-2 px-2 text-center">Código</th>
+                <th className="py-2 px-2 text-center">Fecha alta</th>
+                <th className="py-2 px-2 text-center">Proveedor</th>
               </tr>
             </thead>
             <tbody>
               {articulos.slice(0, 5).map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2">{a.codigoArticulo}</td>
-                  <td className="py-1.5 px-2">
+                  <td className="py-1.5 px-2 text-center">{a.codigoArticulo}</td>
+                  <td className="py-1.5 px-2 text-center">
                     {a.fechaAlta ? a.fechaAlta.split("T")[0] : "—"}
                   </td>
-                  <td className="py-1.5 px-2">
+                  <td className="py-1.5 px-2 text-center">
                     {a.proveedorPredeterminado?.nombreProveedor ?? "—"}
                   </td>
                 </tr>
@@ -205,7 +226,7 @@ export function DashboardContenido() {
           <table className="min-w-full text-sm">
             <thead className="text-xs text-gray-600 uppercase bg-gray-50">
               <tr>
-                <th className="py-2 px-2 text-left">Artículo</th>
+                <th className="py-2 px-2 text-center">Artículo</th>
                 <th className="py-2 px-2 text-center">Actual</th>
                 <th className="py-2 px-2 text-center">Punto pedido</th>
               </tr>
@@ -213,7 +234,7 @@ export function DashboardContenido() {
             <tbody>
               {reponer.slice(0, 5).map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2">{a.nombreArticulo}</td>
+                  <td className="py-1.5 px-2 text-center">{a.nombreArticulo}</td>
                   <td className="py-1.5 px-2 text-center">{a.stockActual}</td>
                   <td className="py-1.5 px-2 text-center">{a.puntoPedido}</td>
                 </tr>
@@ -234,7 +255,7 @@ export function DashboardContenido() {
           <table className="min-w-full text-sm">
             <thead className="text-xs text-gray-600 uppercase bg-gray-50">
               <tr>
-                <th className="py-2 px-2 text-left">Artículo</th>
+                <th className="py-2 px-2 text-center">Artículo</th>
                 <th className="py-2 px-2 text-center">Actual</th>
                 <th className="py-2 px-2 text-center">Seguridad</th>
               </tr>
@@ -242,7 +263,7 @@ export function DashboardContenido() {
             <tbody>
               {faltantes.slice(0, 5).map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2">{a.nombreArticulo}</td>
+                  <td className="py-1.5 px-2 text-center">{a.nombreArticulo}</td>
                   <td className="py-1.5 px-2 text-center">{a.stockActual}</td>
                   <td className="py-1.5 px-2 text-center">
                     {a.stockSeguridad}
@@ -265,17 +286,17 @@ export function DashboardContenido() {
           <table className="min-w-full text-sm">
             <thead className="text-xs text-gray-600 uppercase bg-gray-50">
               <tr>
-                <th className="py-2 px-2 text-left">Artículo</th>
+                <th className="py-2 px-2 text-center">Artículo</th>
                 <th className="py-2 px-2 text-center">Stock</th>
-                <th className="py-2 px-2 text-left">Proveedor</th>
+                <th className="py-2 px-2 text-center">Proveedor</th>
               </tr>
             </thead>
             <tbody>
               {topStock.map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2">{a.nombreArticulo}</td>
+                  <td className="py-1.5 px-2 text-center">{a.nombreArticulo}</td>
                   <td className="py-1.5 px-2 text-center">{a.stockActual}</td>
-                  <td className="py-1.5 px-2">
+                  <td className="py-1.5 px-2 text-center">
                     {a.proveedorPredeterminado?.nombreProveedor ?? "—"}
                   </td>
                 </tr>
