@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ModificarOrdenCompra } from "./ModificarOrdenCompra";
 import OrdenCompraActions from "./OrdenCompraActions";
 import DetalleOrdenCompraModal from "./DetalleOrdenCompraModal";
+import { ModificarOrdenCompra } from "./ModificarOrdenCompra";
 
 type EstadoOrdenCompra = {
   id: number;
@@ -28,15 +28,13 @@ type Props = {
 };
 
 export function OrdenDeCompraCard({ ordenes, alGuardar }: Props) {
-  const [ordenSeleccionada, setOrdenSeleccionada] = useState<number | null>(
-    null
-  );
+  const [ordenSel, setOrdenSel] = useState<OrdenCompra | null>(null);
   const [verDetalleId, setVerDetalleId] = useState<number | null>(null);
 
   return (
-    <div className="w-full overflow-x-auto rounded shadow bg-white">
-      <div className="overflow-x-auto rounded-lg shadow">
-        <table className="min-w-full text-sm text-gray-700">
+    <>
+      <div className="w-full overflow-x-auto rounded shadow bg-white">
+        <table className="w-full text-sm text-gray-700">
           <thead className="bg-gray-100 text-xs uppercase text-gray-600">
             <tr>
               <th className="px-4 py-3 text-center">Código</th>
@@ -58,15 +56,13 @@ export function OrdenDeCompraCard({ ordenes, alGuardar }: Props) {
                   {o.proveedor.nombreProveedor}
                 </td>
                 <td className="px-4 py-2 text-center">
-                  $
                   {o.costoCompraTotal != null
-                    ? o.costoCompraTotal.toFixed(2)
+                    ? `$${o.costoCompraTotal.toFixed(2)}`
                     : "-"}
                 </td>
                 <td className="px-4 py-2 text-center">
-                  $
                   {o.costoPedidoTotal != null
-                    ? o.costoPedidoTotal.toFixed(2)
+                    ? `$${o.costoPedidoTotal.toFixed(2)}`
                     : "-"}
                 </td>
                 <td className="px-4 py-2 text-center">
@@ -75,25 +71,25 @@ export function OrdenDeCompraCard({ ordenes, alGuardar }: Props) {
                 <td className="px-4 py-2 text-center">
                   <span
                     className={`inline-block rounded-full px-3 py-1 text-xs font-semibold
-                    ${
-                      o.estado.codigoEstadoOrdenCompra === "PENDIENTE"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : o.estado.codigoEstadoOrdenCompra === "CONFIRMADA"
-                        ? "bg-blue-100 text-blue-800"
-                        : o.estado.codigoEstadoOrdenCompra === "FINALIZADA"
-                        ? "bg-green-100 text-green-800"
-                        : o.estado.codigoEstadoOrdenCompra === "CANCELADA"
-                        ? "bg-red-100 text-red-800"
-                        : ""
-                    }`}
+                      ${
+                        o.estado.codigoEstadoOrdenCompra === "PENDIENTE"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : o.estado.codigoEstadoOrdenCompra === "CONFIRMADA"
+                          ? "bg-blue-100 text-blue-800"
+                          : o.estado.codigoEstadoOrdenCompra === "FINALIZADA"
+                          ? "bg-green-100 text-green-800"
+                          : o.estado.codigoEstadoOrdenCompra === "CANCELADA"
+                          ? "bg-red-100 text-red-800"
+                          : ""
+                      }`}
                   >
                     {o.estado.nombreEstadoOrdenCompra}
                   </span>
                 </td>
                 <td className="px-4 py-2 text-center">
                   <OrdenCompraActions
-                    onModificar={() => setOrdenSeleccionada(o.id)}
                     onVerDetalle={() => setVerDetalleId(o.id)}
+                    onModificar={() => setOrdenSel(o)}
                   />
                 </td>
               </tr>
@@ -102,25 +98,24 @@ export function OrdenDeCompraCard({ ordenes, alGuardar }: Props) {
         </table>
       </div>
 
-      {/* Modal modificar */}
-      {ordenSeleccionada !== null && (
-        <ModificarOrdenCompra
-          ordenCompraId={ordenSeleccionada}
-          cerrar={() => setOrdenSeleccionada(null)}
-          alGuardar={() => {
-            setOrdenSeleccionada(null);
-            alGuardar();
-          }}
-        />
-      )}
-
-      {/* Modal detalle */}
-      {verDetalleId !== null && (
+      {/* Modales fuera de la tabla */}
+      {verDetalleId && (
         <DetalleOrdenCompraModal
           ordenId={verDetalleId}
           cerrar={() => setVerDetalleId(null)}
         />
       )}
-    </div>
+
+      {ordenSel && (
+        <ModificarOrdenCompra
+          ordenCompraId={ordenSel.id}
+          cerrar={() => setOrdenSel(null)}
+          alGuardar={() => {
+            setOrdenSel(null);
+            alGuardar();
+          }}
+        />
+      )}
+    </>
   );
 }

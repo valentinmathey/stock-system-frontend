@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { MoreVertical, Edit, Eye, X } from "lucide-react";
+import { MoreVertical, Eye, Edit, X } from "lucide-react";
 
 type Props = {
-  onModificar: () => void;
   onVerDetalle: () => void;
+  onModificar: () => void;
 };
 
 export default function OrdenCompraActions({
-  onModificar,
   onVerDetalle,
+  onModificar,
 }: Props) {
   const [open, setOpen] = useState(false);
 

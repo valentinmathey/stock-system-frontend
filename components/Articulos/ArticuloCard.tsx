@@ -4,6 +4,8 @@ import { useState } from "react";
 import ModificarArticulo from "./ModificarArticulo";
 import ArticuloActions from "./ArticuloActions";
 import ListaProveedoresCard from "./ListaProveedoresCard";
+import { EditarArticulo } from "./EditarArticulo";
+
 
 /* ---------- Tipos ---------- */
 type Articulo = {
@@ -25,18 +27,18 @@ type Articulo = {
 
 type Props = {
   articulos: Articulo[];
-  onGuardar: () => void; // callback para recargar lista desde el padre
+  onGuardar: () => void;
 };
 
 /* --------------------------------------------------------------- */
 export function ArticuloTable({ articulos, onGuardar }: Props) {
-  const [modalPred, setModalPred] = useState(false);  // modal asignar proveedor
-  const [modalLista, setModalLista] = useState(false); // modal ver lista
+  const [modalPred, setModalPred] = useState(false);
+  const [modalLista, setModalLista] = useState(false);
+  const [modalEditar, setModalEditar] = useState(false);
   const [artSel, setArtSel] = useState<Articulo | null>(null);
 
   return (
     <>
-      {/* ---------------- Tabla ---------------- */}
       <div className="w-full overflow-x-auto rounded shadow bg-white">
         <table className="w-full text-sm text-gray-700">
           <thead className="bg-gray-100 text-xs text-gray-600 uppercase">
@@ -62,9 +64,12 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
             {articulos.map((a) => (
               <tr key={a.id} className="border-b hover:bg-gray-50">
                 <td className="px-4 py-2 text-center">{a.codigoArticulo}</td>
-                <td className="px-4 py-2 font-medium text-center">{a.nombreArticulo}</td>
-                <td className="px-4 py-2 text-center">{a.descripcionArticulo}</td>
-
+                <td className="px-4 py-2 font-medium text-center">
+                  {a.nombreArticulo}
+                </td>
+                <td className="px-4 py-2 text-center">
+                  {a.descripcionArticulo}
+                </td>
                 <td
                   className={`px-4 py-2 text-center font-bold ${
                     a.stockActual <= a.stockSeguridad
@@ -74,7 +79,6 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
                 >
                   {a.stockActual}
                 </td>
-
                 <td className="px-4 py-2 text-center">{a.stockSeguridad}</td>
                 <td className="px-4 py-2 text-center">
                   ${a.costoAlmacenamientoPorUnidad.toFixed(2)}
@@ -82,7 +86,6 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
                 <td className="px-4 py-2 text-center">
                   ${a.precioVentaUnitarioArticulo.toFixed(2)}
                 </td>
-
                 <td className="px-4 py-2 text-center">{a.cgi?.toFixed(2)}</td>
                 <td className="px-4 py-2 text-center">
                   {a.loteOptimo?.toFixed(2)}
@@ -96,7 +99,6 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
                 <td className="px-4 py-2 text-center">
                   {a.demandaAnual.toFixed(2)}
                 </td>
-
                 <td className="px-4 py-2">
                   {a.proveedorPredeterminado?.nombreProveedor || "—"}
                 </td>
@@ -111,6 +113,10 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
                       setArtSel(a);
                       setModalLista(true);
                     }}
+                    onEditar={() => {
+                      setArtSel(a);
+                      setModalEditar(true);
+                    }}
                   />
                 </td>
               </tr>
@@ -119,24 +125,36 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
         </table>
       </div>
 
-      {/* ----------- Modal: Asignar proveedor predeterminado ----------- */}
+      {/* Modal: Asignar proveedor */}
       {modalPred && artSel && (
         <ModificarArticulo
           articulo={artSel}
           cerrar={() => setModalPred(false)}
           alGuardar={() => {
             setModalPred(false);
-            onGuardar(); // recargar desde la página
+            onGuardar();
           }}
         />
       )}
 
-      {/* ----------- Modal: Lista de proveedores del artículo ---------- */}
+      {/* Modal: Ver lista de proveedores */}
       {modalLista && artSel && (
         <ListaProveedoresCard
           articuloId={artSel.id}
           nombreArticulo={artSel.nombreArticulo}
           cerrar={() => setModalLista(false)}
+        />
+      )}
+
+      {/* Modal: Editar artículo */}
+      {modalEditar && artSel && (
+        <EditarArticulo
+          articulo={artSel}
+          cerrar={() => setModalEditar(false)}
+          alGuardar={() => {
+            setModalEditar(false);
+            onGuardar();
+          }}
         />
       )}
     </>

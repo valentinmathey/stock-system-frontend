@@ -238,6 +238,7 @@ export function ModificarOrdenCompra({
             <>
               {/* Cancelar */}
               <button
+                type="button"
                 onClick={cancelar}
                 className="bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700"
               >
@@ -245,12 +246,14 @@ export function ModificarOrdenCompra({
               </button>
 
               <button
+                type="button"
                 onClick={confirmar}
                 className="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700"
               >
                 Confirmar orden
               </button>
               <button
+                type="button"
                 onClick={guardarEdicion}
                 className="bg-violet-600 text-white px-3 py-2 rounded hover:bg-violet-700"
               >
@@ -261,6 +264,7 @@ export function ModificarOrdenCompra({
 
           {esConfirmada && (
             <button
+              type="button"
               onClick={finalizar}
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mx-auto"
             >
@@ -271,6 +275,7 @@ export function ModificarOrdenCompra({
 
         <div className="text-right mt-4">
           <button
+            type="button"
             onClick={cerrar}
             className="text-gray-600 hover:underline text-sm"
           >

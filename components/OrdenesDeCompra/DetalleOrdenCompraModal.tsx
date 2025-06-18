@@ -86,7 +86,9 @@ export default function DetalleOrdenCompraModal({ ordenId, cerrar }: Props) {
           <tbody>
             {orden.detallesOrden.map((d, i) => (
               <tr key={i} className="border-t text-gray-800 even:bg-gray-50">
-                <td className="px-3 py-1 text-center">{d.articulo.nombreArticulo}</td>
+                <td className="px-3 py-1 text-center">
+                  {d.articulo.nombreArticulo}
+                </td>
                 <td className="px-3 py-1 text-center">{d.cantidadArticulo}</td>
                 <td className="px-3 py-1 text-center">
                   ${d.costoCompraUnitarioArticulo.toFixed(2)}
@@ -104,6 +106,7 @@ export default function DetalleOrdenCompraModal({ ordenId, cerrar }: Props) {
 
         <div className="mt-4 text-right">
           <button
+            type="button"
             onClick={cerrar}
             className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded"
           >

@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { MoreVertical, Plus, List as ListIcon, X } from "lucide-react";
+import { MoreVertical, Plus, List, ListIcon, X, PenSquare } from "lucide-react";
 
 type Props = {
-  onAsignar: () => void; // abre el modal de “Asignar proveedor”
-  onVerLista: () => void; // abre el modal de “Ver lista”
+  onAsignar: () => void;
+  onVerLista: () => void;
+  onEditar: () => void;
 };
 
-export default function ArticuloActions({ onAsignar, onVerLista }: Props) {
+export default function ArticuloActions({ onAsignar, onVerLista, onEditar }: Props) {
   const [open, setOpen] = useState(false);
 
   /* Cierra si se hace clic fuera de la tarjeta */
@@ -68,6 +69,16 @@ export default function ArticuloActions({ onAsignar, onVerLista }: Props) {
                          hover:bg-gray-100 text-sm"
             >
               <ListIcon size={16} /> Ver lista de proveedores
+            </button>
+
+            <button
+              onClick={() => {
+                setOpen(false);
+                onEditar();
+              }}
+              className="mt-1 flex w-full items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 text-sm"
+            >
+              <PenSquare size={16} /> Editar artículo
             </button>
           </div>
         </div>
