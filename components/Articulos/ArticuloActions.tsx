@@ -67,7 +67,7 @@ export default function ArticuloActions({ onAsignar, onVerLista }: Props) {
               className="mt-1 flex w-full items-center gap-2 px-3 py-2 rounded
                          hover:bg-gray-100 text-sm"
             >
-              <ListIcon size={16} /> Ver lista
+              <ListIcon size={16} /> Ver lista de proveedores
             </button>
           </div>
         </div>

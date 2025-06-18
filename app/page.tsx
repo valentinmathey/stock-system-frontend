@@ -1,5 +1,5 @@
 import { BotonInicio } from "@/components/Inicio/BotonInicio";
-import { ArrowRightLeft, FileText, Handshake, LayoutDashboard, Package } from "lucide-react";
+import { ArrowRightLeft, FileText, Handshake, LayoutDashboard, Package, UserRound } from "lucide-react";
 
 export default function Home(){
   return(
@@ -11,6 +11,7 @@ export default function Home(){
           <BotonInicio titulo="Artículos" icono={Package} link="/articulos" />
           <BotonInicio titulo="Órdenes de compra" icono={FileText} link="/ordenesdecompra" />
           <BotonInicio titulo="Ventas" icono={ArrowRightLeft} link="/ventas" />
+          <BotonInicio titulo="Team" icono={UserRound} link="/team" />
         </div>
     </div>
   )

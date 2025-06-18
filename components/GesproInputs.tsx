@@ -35,6 +35,7 @@ export function GesProInputNumber({
       <label className="font-medium">{label}</label>
       <input
         type="number"
+        min={0}
         name={name}
         onChange={handleChange}
         className="w-full border border-gray-300 rounded px-3 py-2"

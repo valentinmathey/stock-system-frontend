@@ -1,6 +1,7 @@
 "use client";
 import { HTMLInputTypeAttribute, useEffect, useState } from "react";
 import { GesProInputNumber, GesProInputText } from "../GesproInputs";
+import { toast } from "react-toastify";
 
 type Props = {
   cerrar: () => void;
@@ -54,18 +55,56 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("llegué");
-    const res = await fetch("http://localhost:3000/articulos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formulario),
-    });
 
-    if (res.ok) {
-      alGuardar();
-      cerrar();
-    } else {
-      alert("Error al crear artículo");
+    const {
+      codigoArticulo,
+      nombreArticulo,
+      precioVentaUnitarioArticulo,
+      costoAlmacenamientoPorUnidad,
+      stockActual,
+      stockSeguridad,
+      demandaAnual,
+    } = formulario;
+
+    if (!codigoArticulo.trim() || !nombreArticulo.trim()) {
+      toast.warn("Completá el código y el nombre del artículo.");
+      return;
+    }
+
+    if (precioVentaUnitarioArticulo <= 0) {
+      toast.warn("El precio de venta debe ser mayor a 0.");
+      return;
+    }
+
+    if (costoAlmacenamientoPorUnidad <= 0) {
+      toast.warn("El costo de almacenamiento debe ser mayor a 0.");
+      return;
+    }
+
+    if (stockActual < 0 || stockSeguridad < 0 || demandaAnual < 0) {
+      toast.warn("Los valores de stock y demanda no pueden ser negativos.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:3000/articulos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formulario),
+      });
+
+      if (res.ok) {
+        toast.success("Artículo creado correctamente");
+        alGuardar();
+        cerrar();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        toast.error(
+          "Error al crear artículo: " + (err.message || "desconocido")
+        );
+      }
+    } catch (error) {
+      toast.error("Error de conexión con el servidor");
     }
   };
 

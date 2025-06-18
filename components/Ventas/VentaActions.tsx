@@ -49,7 +49,7 @@ export default function VentaActions({ onVerDetalle }: Props) {
               className="flex w-full items-center gap-2 px-3 py-2 rounded
                          hover:bg-gray-100 text-sm"
             >
-              <Eye size={16} /> Ver detalle
+              <Eye size={16} /> Ver detalle Venta
             </button>
           </div>
         </div>

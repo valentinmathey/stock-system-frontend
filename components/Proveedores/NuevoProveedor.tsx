@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 /* --------- Tipos --------- */
 type Articulo = { id: number; nombreArticulo: string };
@@ -97,18 +98,64 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:3000/proveedores", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(buildPayload()),
-    });
+    if (!form.codigoProveedor.trim() || !form.nombreProveedor.trim()) {
+      toast.warn("Completá el código y nombre del proveedor.");
+      return;
+    }
 
-    if (res.ok) {
-      alGuardar();
-      cerrar();
-    } else {
-      const err = await res.json().catch(() => ({}));
-      alert(`Error al crear proveedor: ${err.message ?? "sin detalle"}`);
+    if (form.articulo.articuloId === 0) {
+      toast.warn("Seleccioná un artículo.");
+      return;
+    }
+
+    if (form.articulo.costoPedido <= 0) {
+      toast.warn("El costo de pedido debe ser mayor a 0.");
+      return;
+    }
+    if (form.articulo.costoCompraUnitarioArticulo <= 0) {
+      toast.warn("El costo unitario debe ser mayor a 0.");
+      return;
+    }
+    if (form.articulo.demoraEntregaProveedor <= 0) {
+      toast.warn("La demora de entrega debe ser mayor a 0.");
+      return;
+    }
+
+    if (
+      form.articulo.modeloInventario === "TIEMPO_FIJO" &&
+      (!form.articulo.tiempoRevision || form.articulo.tiempoRevision <= 0)
+    ) {
+      toast.warn("El tiempo de revisión debe ser mayor a 0.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:3000/proveedores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+
+      if (res.ok) {
+        toast.success("Proveedor creado correctamente");
+        alGuardar();
+        cerrar();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        const msg = err.message ?? "Error desconocido";
+
+        if (msg.includes("proveedor con código")) {
+          toast.error("Ya existe un proveedor con ese código.");
+        } else if (msg.includes("artículo") && msg.includes("no existe")) {
+          toast.error("El artículo seleccionado no existe.");
+        } else if (msg.includes("modeloInventario")) {
+          toast.error("Faltan datos para el modelo de inventario.");
+        } else {
+          toast.error(`${msg}`);
+        }
+      }
+    } catch (err) {
+      toast.error("Error al conectar con el servidor");
     }
   };
 
@@ -180,6 +227,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
           <label className="font-medium">Costo pedido</label>
           <input
             type="number"
+            min={0}
             name="costoPedido"
             value={form.articulo.costoPedido}
             onChange={handleChange}
@@ -190,6 +238,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
           <label className="font-medium">Costo compra unitario</label>
           <input
             type="number"
+            min={0}
             name="costoCompraUnitarioArticulo"
             value={form.articulo.costoCompraUnitarioArticulo}
             onChange={handleChange}
@@ -200,6 +249,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
           <label className="font-medium">Demora entrega (días)</label>
           <input
             type="number"
+            min={0}
             name="demoraEntregaProveedor"
             value={form.articulo.demoraEntregaProveedor}
             onChange={handleChange}
@@ -217,7 +267,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
                 value={form.articulo.tiempoRevision ?? ""}
                 onChange={handleChange}
                 required
-                min={1}
+                min={0}
                 className="w-full border border-gray-300 rounded px-3 py-2"
               />
             </>

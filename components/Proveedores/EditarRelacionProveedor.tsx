@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 /* ---------- tipos ---------- */
 export type RelacionAP = {
@@ -55,11 +56,40 @@ export default function EditarRelArtProv({ rel, cerrar, alGuardar }: Props) {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const payload: any = { ...form };
-    if (!esTiempoFijo) delete payload.tiempoRevision;
+  // Validaciones
+  if (form.costoPedido <= 0) {
+    toast.warn("El costo de pedido debe ser mayor a 0.");
+    return;
+  }
 
+  if (form.costoCompraUnitarioArticulo <= 0) {
+    toast.warn("El costo unitario debe ser mayor a 0.");
+    return;
+  }
+
+  if (form.demoraEntregaProveedor <= 0) {
+    toast.warn("La demora debe ser mayor a 0.");
+    return;
+  }
+
+  if (
+    form.modeloInventario === "TIEMPO_FIJO" &&
+    (!form.tiempoRevision || form.tiempoRevision <= 0)
+  ) {
+    toast.warn("El tiempo de revisión debe ser mayor a 0.");
+    return;
+  }
+
+  // Payload
+  const payload: any = { ...form };
+  if (form.modeloInventario !== "TIEMPO_FIJO") {
+    delete payload.tiempoRevision;
+  }
+
+  // Enviar
+  try {
     const res = await fetch(
       `http://localhost:3000/articulos-proveedores/${rel.id}`,
       {
@@ -70,13 +100,17 @@ export default function EditarRelArtProv({ rel, cerrar, alGuardar }: Props) {
     );
 
     if (res.ok) {
+      toast.success("Relación actualizada correctamente");
       alGuardar();
       cerrar();
     } else {
       const err = await res.json().catch(() => ({}));
-      alert(`Error al guardar: ${err.message ?? "sin detalle"}`);
+      toast.error(`Error al guardar: ${err.message ?? "sin detalle"}`);
     }
-  };
+  } catch (err) {
+    toast.error("Error al conectar con el servidor");
+  }
+};
 
   /* ---------------- UI ---------------- */
   return (
@@ -110,6 +144,7 @@ export default function EditarRelArtProv({ rel, cerrar, alGuardar }: Props) {
             onChange={handleChange}
             className="border border-gray-300 rounded px-3 py-2"
             required
+            min={0}
           />
 
           {/* Costo unitario */}
@@ -121,6 +156,7 @@ export default function EditarRelArtProv({ rel, cerrar, alGuardar }: Props) {
             onChange={handleChange}
             className="border border-gray-300 rounded px-3 py-2"
             required
+            min={0}
           />
 
           {/* Demora */}
@@ -132,6 +168,7 @@ export default function EditarRelArtProv({ rel, cerrar, alGuardar }: Props) {
             onChange={handleChange}
             className="border border-gray-300 rounded px-3 py-2"
             required
+            min={0}
           />
 
           {/* Tiempo revisión – solo TIEMPO_FIJO */}
@@ -143,7 +180,7 @@ export default function EditarRelArtProv({ rel, cerrar, alGuardar }: Props) {
                 name="tiempoRevision"
                 value={form.tiempoRevision ?? ""}
                 onChange={handleChange}
-                min={1}
+                min={0}
                 className="border border-gray-300 rounded px-3 py-2"
                 required
               />

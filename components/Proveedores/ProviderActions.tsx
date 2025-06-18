@@ -66,7 +66,7 @@ export default function ProviderActions({
               className="mt-1 flex w-full items-center gap-2 px-3 py-2 rounded
                          hover:bg-gray-100 text-sm"
             >
-              <ListIcon size={16} /> Ver lista
+              <ListIcon size={16} /> Ver lista de articulos
             </button>
           </div>
         </div>

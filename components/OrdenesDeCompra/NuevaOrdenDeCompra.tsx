@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 // Tipos
-
 type Props = {
   cerrar: () => void;
   alGuardar: () => void;
@@ -52,7 +52,6 @@ export function NuevaOrdenCompra({ cerrar, alGuardar }: Props) {
     const proveedorSugeridoId = art.proveedorPredeterminado?.id ?? 0;
     const loteSugerido = art.loteOptimo ?? 1;
 
-    // Cargar proveedores del artículo
     fetch(`http://localhost:3000/articulos/${art.id}/proveedores`)
       .then((res) => res.json())
       .then((data) => {
@@ -65,7 +64,6 @@ export function NuevaOrdenCompra({ cerrar, alGuardar }: Props) {
       })
       .catch(() => setProveedoresArticulo([]));
 
-    // Sugerir proveedor y lote
     setFormulario((prev) => ({
       ...prev,
       proveedorId: proveedorSugeridoId,
@@ -76,27 +74,32 @@ export function NuevaOrdenCompra({ cerrar, alGuardar }: Props) {
         },
       ],
     }));
+  }, [formulario.articuloId]);
 
-    // Verificar si existe OC activa para artículo + proveedor sugerido
+  useEffect(() => {
+    if (formulario.articuloId === 0 || formulario.proveedorId === 0) return;
+
     fetch("http://localhost:3000/ordenes-compra")
       .then((res) => res.json())
       .then((ordenes) => {
         const tieneActiva = ordenes.some(
           (oc: any) =>
-            oc.proveedor.id === proveedorSugeridoId &&
-            oc.detallesOrden.some((d: any) => d.articulo.id === art.id) &&
+            oc.proveedor.id === formulario.proveedorId &&
+            oc.detallesOrden.some(
+              (d: any) => d.articulo.id === formulario.articuloId
+            ) &&
             ["PENDIENTE", "CONFIRMADA"].includes(
               oc.estado.codigoEstadoOrdenCompra
             )
         );
 
         if (tieneActiva) {
-          alert(
-            "⚠️ Ya existe una orden activa para este artículo con ese proveedor"
+          toast.warning(
+            "Ya existe una orden activa para este artículo con ese proveedor"
           );
         }
       });
-  }, [formulario.articuloId]);
+  }, [formulario.articuloId, formulario.proveedorId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -130,15 +133,36 @@ export function NuevaOrdenCompra({ cerrar, alGuardar }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (
-      formulario.proveedorId === 0 ||
-      formulario.detalles.length === 0 ||
-      formulario.detalles.some(
-        (d) => d.articuloId === 0 || d.cantidadArticulo <= 0
-      )
-    ) {
-      alert("Completá todos los campos antes de guardar.");
+    // Validaciones
+    if (formulario.fechaOrdenCompra.trim() === "") {
+      toast.warn("Ingresá una fecha válida.");
       return;
+    }
+
+    if (formulario.articuloId === 0) {
+      toast.warn("Seleccioná un artículo.");
+      return;
+    }
+
+    if (formulario.proveedorId === 0) {
+      toast.warn("Seleccioná un proveedor.");
+      return;
+    }
+
+    if (formulario.detalles.length === 0) {
+      toast.warn("Agregá al menos un artículo.");
+      return;
+    }
+
+    for (const detalle of formulario.detalles) {
+      if (detalle.articuloId === 0) {
+        toast.warn("El artículo no puede estar vacío.");
+        return;
+      }
+      if (detalle.cantidadArticulo <= 0) {
+        toast.warn("La cantidad debe ser mayor a 0.");
+        return;
+      }
     }
 
     const payload = {
@@ -147,26 +171,24 @@ export function NuevaOrdenCompra({ cerrar, alGuardar }: Props) {
       detalles: formulario.detalles,
     };
 
-    const res = await fetch("http://localhost:3000/ordenes-compra", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch("http://localhost:3000/ordenes-compra", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    const data = await res.json();
-    if (res.ok) {
-      alert("✅ Orden registrada correctamente");
-      alGuardar();
-      cerrar();
-    } else {
-      alert("❌ Error:\n" + (data.message || "Error desconocido"));
-    }
+      const data = await res.json();
 
-    if (res.ok) {
-      alGuardar();
-      cerrar();
-    } else {
-      alert("Error al registrar la orden de compra");
+      if (res.ok) {
+        toast.success("Orden registrada correctamente.");
+        alGuardar();
+        cerrar();
+      } else {
+        toast.error("Error: " + (data.message || "Error desconocido"));
+      }
+    } catch (error) {
+      toast.error("No se pudo conectar con el servidor.");
     }
   };
 
@@ -243,6 +265,7 @@ export function NuevaOrdenCompra({ cerrar, alGuardar }: Props) {
                   }
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   required
+                  min={0}
                 />
               </div>
             </div>
