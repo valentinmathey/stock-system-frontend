@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 type Proveedor = { id: number; nombreProveedor: string };
 
@@ -38,6 +39,11 @@ export default function ModificarArticulo({
 
   /* guardar */
   const handleGuardar = async () => {
+    if (!proveedorId || proveedorId === 0) {
+      toast.warn("Seleccioná un proveedor válido antes de guardar.");
+      return;
+    }
+
     try {
       const res = await fetch(
         `http://localhost:3000/articulos/${articulo.id}`,
@@ -48,13 +54,16 @@ export default function ModificarArticulo({
         }
       );
 
-      if (res.ok) alGuardar();
-      else {
+      if (res.ok) {
+        toast.success("Proveedor actualizado correctamente");
+        alGuardar();
+        cerrar();
+      } else {
         const err = await res.json().catch(() => ({}));
-        alert(`Error al guardar: ${err.message ?? "sin detalle"}`);
+        toast.error(`Error al guardar: ${err.message ?? "sin detalle"}`);
       }
     } catch {
-      alert("Error al guardar (sin conexión con backend)");
+      toast.error("Error al guardar (sin conexión con backend)");
     }
   };
 

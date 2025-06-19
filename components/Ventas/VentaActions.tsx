@@ -1,29 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { MoreVertical, Plus, List as ListIcon, X } from "lucide-react";
+import { useState, useCallback } from "react";
+import { MoreVertical, Eye, X } from "lucide-react";
 
 type Props = {
-  onAgregarArticulo: () => void;
-  onVerLista: () => void;
+  onVerDetalle: () => void;
 };
 
-export default function ProviderActions({
-  onAgregarArticulo,
-  onVerLista,
-}: Props) {
+export default function VentaActions({ onVerDetalle }: Props) {
   const [open, setOpen] = useState(false);
 
-  /* backdrop click = cerrar */
-  const handleBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdrop = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (e.currentTarget === e.target) setOpen(false);
-  };
+  }, []);
 
   return (
     <>
       <button
         onClick={() => setOpen(true)}
-        className="bg-violet-600 text-white px-3 py-1.5 rounded
+        className="bg-violet-600 text-white px-3 py-1.5 rounded font-medium
                    inline-flex items-center gap-1"
       >
         Acciones
@@ -32,16 +27,15 @@ export default function ProviderActions({
 
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 flex items-center justify-center"
           onClick={handleBackdrop}
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/60"
         >
           <div className="bg-white rounded-lg shadow-xl w-64 p-4">
-            {/* header */}
             <div className="flex justify-between items-center mb-3">
               <span className="font-semibold">Acciones</span>
               <button
-                className="text-gray-500 hover:text-gray-700"
                 onClick={() => setOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
               >
                 <X size={18} />
               </button>
@@ -50,23 +44,12 @@ export default function ProviderActions({
             <button
               onClick={() => {
                 setOpen(false);
-                onAgregarArticulo();
+                onVerDetalle();
               }}
               className="flex w-full items-center gap-2 px-3 py-2 rounded
                          hover:bg-gray-100 text-sm"
             >
-              <Plus size={16} /> Agregar artículo
-            </button>
-
-            <button
-              onClick={() => {
-                setOpen(false);
-                onVerLista();
-              }}
-              className="mt-1 flex w-full items-center gap-2 px-3 py-2 rounded
-                         hover:bg-gray-100 text-sm"
-            >
-              <ListIcon size={16} /> Ver lista de articulos
+              <Eye size={16} /> Ver detalle Venta
             </button>
           </div>
         </div>

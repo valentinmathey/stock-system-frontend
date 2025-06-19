@@ -53,22 +53,22 @@ export default function ListaProveedoresCard({
         <table className="w-full text-sm text-gray-700">
           <thead className="bg-gray-100 text-xs text-gray-600 uppercase">
             <tr>
-              <th className="px-3 py-2">Proveedor</th>
-              <th className="px-3 py-2">Modelo</th>
-              <th className="px-3 py-2">Costo pedido</th>
-              <th className="px-3 py-2">Costo unitario</th>
-              <th className="px-3 py-2">Demora (d)</th>
-              <th className="px-3 py-2">Tiempo rev. (d)</th>
-              <th className="px-3 py-2">Próx. rev.</th>
+              <th className="px-3 py-2 text-center">Proveedor</th>
+              <th className="px-3 py-2 text-center">Modelo</th>
+              <th className="px-3 py-2 text-center">Costo pedido</th>
+              <th className="px-3 py-2 text-center">Costo unitario</th>
+              <th className="px-3 py-2 text-center">Demora (d)</th>
+              <th className="px-3 py-2 text-center">Tiempo rev. (d)</th>
+              <th className="px-3 py-2 text-center">Próx. rev.</th>
             </tr>
           </thead>
           <tbody>
             {relaciones.map((r) => (
               <tr key={r.id} className="border-b">
-                <td className="px-3 py-2">{r.proveedor.nombreProveedor}</td>
-                <td className="px-3 py-2">{r.modeloInventario}</td>
-                <td className="px-3 py-2">${r.costoPedido.toFixed(2)}</td>
-                <td className="px-3 py-2">
+                <td className="px-3 py-2 text-center">{r.proveedor.nombreProveedor}</td>
+                <td className="px-3 py-2 text-center">{r.modeloInventario}</td>
+                <td className="px-3 py-2 text-center">${r.costoPedido.toFixed(2)}</td>
+                <td className="px-3 py-2 text-center">
                   ${r.costoCompraUnitarioArticulo.toFixed(2)}
                 </td>
                 <td className="px-3 py-2 text-center">

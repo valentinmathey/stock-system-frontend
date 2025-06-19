@@ -24,16 +24,16 @@ export function ProveedorCard({ proveedores }: Props) {
         <table className="w-full text-sm text-gray-700">
           <thead className="bg-gray-100 text-xs text-gray-600 uppercase">
             <tr>
-              <th className="px-4 py-3 text-left">Nombre</th>
-              <th className="px-4 py-3 text-left">Código</th>
+              <th className="px-4 py-3 text-center">Nombre</th>
+              <th className="px-4 py-3 text-center">Código</th>
               <th className="px-4 py-3 text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {proveedores.map((p) => (
               <tr key={p.id} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-2 font-medium">{p.nombreProveedor}</td>
-                <td className="px-4 py-2">{p.codigoProveedor}</td>
+                <td className="px-4 py-2 font-medium text-center">{p.nombreProveedor}</td>
+                <td className="px-4 py-2 text-center">{p.codigoProveedor}</td>
                 <td className="px-4 py-2 text-center">
                   <ProviderActions
                     onAgregarArticulo={() => {

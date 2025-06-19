@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 type Props = {
   cerrar: () => void;
@@ -27,11 +28,7 @@ export function NuevaVenta({ cerrar, alGuardar }: Props) {
       .catch(() => setArticulos([]));
   }, []);
 
-  const handleDetalleChange = (
-    index: number,
-    field: string,
-    value: string
-  ) => {
+  const handleDetalleChange = (index: number, field: string, value: string) => {
     const nuevoDetalle = [...formulario.detalle];
     nuevoDetalle[index] = {
       ...nuevoDetalle[index],
@@ -58,27 +55,79 @@ export function NuevaVenta({ cerrar, alGuardar }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validaciones frontend
+    if (!formulario.fechaVenta) {
+      toast.warn("Seleccioná una fecha de venta");
+      return;
+    }
+
+    if (formulario.detalle.length === 0) {
+      toast.warn("Agregá al menos un artículo");
+      return;
+    }
+
+    const articuloNoSeleccionado = formulario.detalle.some(
+      (item) => item.articuloId === 0
+    );
+
+    if (articuloNoSeleccionado) {
+      toast.warn("Hay artículos no seleccionados");
+      return;
+    }
+
+    const cantidadInvalida = formulario.detalle.some(
+      (item) => isNaN(item.cantidadArticulo) || item.cantidadArticulo <= 0
+    );
+
+    if (cantidadInvalida) {
+      toast.warn("Las cantidades deben ser mayores a 0");
+      return;
+    }
+
+    // Enviar al backend
     const ventaFinal = {
       ...formulario,
       ventaTotal: calcularTotalVenta(),
     };
 
-    const res = await fetch("http://localhost:3000/ventas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(ventaFinal),
-    });
+    try {
+      const res = await fetch("http://localhost:3000/ventas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ventaFinal),
+      });
 
-    if (res.ok) {
-      alGuardar();
-      cerrar();
-    } else {
-      alert("Error al registrar venta");
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Venta registrada correctamente");
+        alGuardar();
+        cerrar();
+      } else {
+        // Errores personalizados desde NestJS
+        const msg = data.message ?? "Error desconocido";
+
+        if (msg.includes("repetidos")) {
+          toast.error("Hay artículos repetidos en el detalle");
+        } else if (msg.includes("Stock insuficiente")) {
+          toast.error(`${msg}`);
+        } else if (msg.includes("dado de baja")) {
+          toast.error(`${msg}`);
+        } else if (msg.includes("no existe")) {
+          toast.error(`${msg}`);
+        } else if (msg.includes("lote óptimo")) {
+          toast.error(`${msg}`);
+        } else {
+          toast.error(`${msg}`);
+        }
+      }
+    } catch (err) {
+      toast.error("Error al conectar con el servidor");
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center text-black">
+    <div className="fixed inset-0 bg-black/60 z-40 flex items-center justify-center text-black">
       <div className="bg-white w-full max-w-2xl rounded-lg shadow-lg p-8 z-50 max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-bold mb-6 text-center">Registrar venta</h2>
         <form onSubmit={handleSubmit} className="grid gap-4">
@@ -117,7 +166,7 @@ export function NuevaVenta({ cerrar, alGuardar }: Props) {
                 <label>Cantidad</label>
                 <input
                   type="number"
-                  min={1}
+                  min={0}
                   value={item.cantidadArticulo}
                   onChange={(e) =>
                     handleDetalleChange(idx, "cantidadArticulo", e.target.value)

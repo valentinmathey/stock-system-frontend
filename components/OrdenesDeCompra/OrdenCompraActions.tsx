@@ -1,27 +1,16 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import {
-  MoreVertical,
-  Plus,
-  ListIcon,
-  PenSquare,
-  Trash2,
-  X,
-} from "lucide-react";
+import { MoreVertical, Eye, Edit, X } from "lucide-react";
 
 type Props = {
-  onAsignar: () => void;
-  onVerLista: () => void;
-  onEditar: () => void;
-  onEliminar: () => void;
+  onVerDetalle: () => void;
+  onModificar: () => void;
 };
 
-export default function ArticuloActions({
-  onAsignar,
-  onVerLista,
-  onEditar,
-  onEliminar,
+export default function OrdenCompraActions({
+  onVerDetalle,
+  onModificar,
 }: Props) {
   const [open, setOpen] = useState(false);
 
@@ -35,7 +24,8 @@ export default function ArticuloActions({
         onClick={() => setOpen(true)}
         className="bg-violet-600 text-white px-3 py-1.5 rounded font-medium inline-flex items-center gap-1"
       >
-        Acciones <MoreVertical size={14} className="shrink-0" />
+        Acciones
+        <MoreVertical size={14} />
       </button>
 
       {open && (
@@ -57,41 +47,21 @@ export default function ArticuloActions({
             <button
               onClick={() => {
                 setOpen(false);
-                onAsignar();
+                onModificar();
               }}
               className="flex w-full items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 text-sm"
             >
-              <Plus size={16} /> Asignar proveedor
+              <Edit size={16} /> Modificar OC
             </button>
 
             <button
               onClick={() => {
                 setOpen(false);
-                onVerLista();
+                onVerDetalle();
               }}
               className="mt-1 flex w-full items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 text-sm"
             >
-              <ListIcon size={16} /> Ver lista de proveedores
-            </button>
-
-            <button
-              onClick={() => {
-                setOpen(false);
-                onEditar();
-              }}
-              className="mt-1 flex w-full items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 text-sm"
-            >
-              <PenSquare size={16} /> Editar artículo
-            </button>
-
-            <button
-              onClick={() => {
-                setOpen(false);
-                onEliminar(); // abrimos directamente el modal de eliminación
-              }}
-              className="mt-1 flex w-full items-center gap-2 px-3 py-2 rounded hover:bg-red-100 text-sm text-red-600"
-            >
-              <Trash2 size={16} /> Eliminar artículo
+              <Eye size={16} /> Ver detalle OC
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 /* ---------- Tipos ---------- */
 type Articulo = { id: number; nombreArticulo: string };
@@ -131,20 +132,64 @@ export default function ModificarProveedor({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:3000/articulos-proveedores", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(buildPayload()),
-    });
 
-    if (res.ok) {
-      alGuardar();
-      cerrar();
-    } else {
-      const err = await res.json().catch(() => ({}));
-      alert(
-        `Error al modificar proveedor: ${err.message ?? "relación duplicada"}`
-      );
+    // Validaciones frontend
+    const art = formulario.articulo;
+
+    if (art.articuloId === 0) {
+      toast.warn("Seleccioná un artículo.");
+      return;
+    }
+
+    if (art.costoPedido <= 0) {
+      toast.warn("El costo de pedido debe ser mayor a 0.");
+      return;
+    }
+
+    if (art.costoCompraUnitarioArticulo <= 0) {
+      toast.warn("El costo unitario debe ser mayor a 0.");
+      return;
+    }
+
+    if (art.demoraEntregaProveedor <= 0) {
+      toast.warn("La demora de entrega debe ser mayor a 0.");
+      return;
+    }
+
+    if (
+      art.modeloInventario === "TIEMPO_FIJO" &&
+      (!art.tiempoRevision || art.tiempoRevision <= 0)
+    ) {
+      toast.warn("El tiempo de revisión debe ser mayor a 0.");
+      return;
+    }
+
+    // Enviar al backend
+    try {
+      const res = await fetch("http://localhost:3000/articulos-proveedores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+
+      if (res.ok) {
+        toast.success("Relación proveedor-artículo creada correctamente.");
+        alGuardar();
+        cerrar();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        const msg = err.message ?? "Error desconocido";
+
+        if (msg.includes("relación") && msg.includes("existente")) {
+          toast.error("Ya existe una relación con este artículo.");
+        } else if (msg.includes("modeloInventario")) {
+          toast.error("Faltan datos para el modelo de inventario.");
+        } else {
+          toast.error(`${msg}`);
+        }
+      }
+    } catch (err) {
+      toast.error("Error al conectar con el servidor.");
     }
   };
 
@@ -206,6 +251,7 @@ export default function ModificarProveedor({
             value={formulario.articulo.costoPedido}
             onChange={handleChange}
             required
+            min={0}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
@@ -216,6 +262,7 @@ export default function ModificarProveedor({
             value={formulario.articulo.costoCompraUnitarioArticulo}
             onChange={handleChange}
             required
+            min={0}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
@@ -226,6 +273,7 @@ export default function ModificarProveedor({
             value={formulario.articulo.demoraEntregaProveedor}
             onChange={handleChange}
             required
+            min={0}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
@@ -238,7 +286,7 @@ export default function ModificarProveedor({
                 name="tiempoRevision"
                 value={formulario.articulo.tiempoRevision ?? ""}
                 onChange={handleChange}
-                min={1}
+                min={0}
                 required
                 className="w-full border border-gray-300 rounded px-3 py-2"
               />
