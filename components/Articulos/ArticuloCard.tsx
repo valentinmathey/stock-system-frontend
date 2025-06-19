@@ -5,7 +5,7 @@ import ModificarArticulo from "./ModificarArticulo";
 import ArticuloActions from "./ArticuloActions";
 import ListaProveedoresCard from "./ListaProveedoresCard";
 import { EditarArticulo } from "./EditarArticulo";
-
+import { EliminarArticulo } from "./EliminarArticulo";
 
 /* ---------- Tipos ---------- */
 type Articulo = {
@@ -35,6 +35,7 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
   const [modalPred, setModalPred] = useState(false);
   const [modalLista, setModalLista] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
+  const [modalEliminar, setModalEliminar] = useState<Articulo | null>(null);
   const [artSel, setArtSel] = useState<Articulo | null>(null);
 
   return (
@@ -103,7 +104,7 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
                   {a.proveedorPredeterminado?.nombreProveedor || "—"}
                 </td>
 
-                <td className="px-4 py-2 text-center">
+                <td className="px-4 py-2 text-center text-black">
                   <ArticuloActions
                     onAsignar={() => {
                       setArtSel(a);
@@ -116,6 +117,10 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
                     onEditar={() => {
                       setArtSel(a);
                       setModalEditar(true);
+                    }}
+                    onEliminar={() => {
+                      setArtSel(a);
+                      setModalEliminar(a);
                     }}
                   />
                 </td>
@@ -153,6 +158,18 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
           cerrar={() => setModalEditar(false)}
           alGuardar={() => {
             setModalEditar(false);
+            onGuardar();
+          }}
+        />
+      )}
+
+      {/* Modal: Eliminar artículo */}
+      {modalEliminar && (
+        <EliminarArticulo
+          articulo={modalEliminar}
+          cerrar={() => setModalEliminar(null)}
+          alGuardar={() => {
+            setModalEliminar(null);
             onGuardar();
           }}
         />
