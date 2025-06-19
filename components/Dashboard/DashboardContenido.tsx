@@ -24,15 +24,22 @@ type Articulo = {
   codigoArticulo: string;
   nombreArticulo: string;
   fechaAlta?: string | null;
+  fechaBajaArticulo?: string | null;
   stockActual: number;
   stockSeguridad: number;
   puntoPedido: number;
   proveedorPredeterminado?: { nombreProveedor: string };
 };
 
+type Proveedor = {
+  id: number;
+  codigoProveedor: string;
+  nombreProveedor: string;
+  fechaBajaProveedor?: string;
+};
+
 /* ================================================================= */
 export function DashboardContenido() {
-  /* ---- estados ---- */
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [ordenes, setOrdenes] = useState<Orden[]>([]);
   const [ordenesPendientes, setOrdenesPendientes] = useState<Orden[]>([]);
@@ -40,28 +47,42 @@ export function DashboardContenido() {
   const [reponer, setReponer] = useState<Articulo[]>([]);
   const [faltantes, setFaltantes] = useState<Articulo[]>([]);
   const [topStock, setTopStock] = useState<Articulo[]>([]);
+  const [articulosDadosDeBaja, setArticulosDadosDeBaja] = useState<Articulo[]>(
+    []
+  );
+  const [proveedoresDadosDeBaja, setProveedoresDadosDeBaja] = useState<
+    Proveedor[]
+  >([]);
 
-  /* ---- carga inicial ---- */
   useEffect(() => {
     const cargar = async () => {
       try {
-        const [ventasR, ordenesR, artsR, repoR, faltR, topStockR] =
-          await Promise.all([
-            fetch("http://localhost:3000/ventas").then((r) => r.json()),
-            fetch("http://localhost:3000/ordenes-compra").then((r) => r.json()),
-            fetch("http://localhost:3000/articulos").then((r) => r.json()),
-            fetch("http://localhost:3000/articulos/paraReponer").then((r) =>
-              r.json()
-            ),
-            fetch("http://localhost:3000/articulos/stockBajo").then((r) =>
-              r.json()
-            ),
-            fetch("http://localhost:3000/articulos/top-stock?limit=5").then(
-              (r) => r.json()
-            ),
-          ]);
+        const [
+          ventasR,
+          ordenesR,
+          artsR,
+          repoR,
+          faltR,
+          topStockR,
+          artsBajaR,
+          provBajaR,
+        ] = await Promise.all([
+          fetch("http://localhost:3000/ventas").then((r) => r.json()),
+          fetch("http://localhost:3000/ordenes-compra").then((r) => r.json()),
+          fetch("http://localhost:3000/articulos").then((r) => r.json()),
+          fetch("http://localhost:3000/articulos/paraReponer").then((r) =>
+            r.json()
+          ),
+          fetch("http://localhost:3000/articulos/stockBajo").then((r) =>
+            r.json()
+          ),
+          fetch("http://localhost:3000/articulos/top-stock?limit=5").then((r) =>
+            r.json()
+          ),
+          fetch("http://localhost:3000/articulos/baja").then((r) => r.json()),
+          fetch("http://localhost:3000/proveedores/baja").then((r) => r.json()),
+        ]);
 
-        /* fuerza a arrays y ordena donde hace falta */
         const v = Array.isArray(ventasR) ? ventasR : [];
         const o = Array.isArray(ordenesR) ? ordenesR : [];
         const op = o.filter(
@@ -71,6 +92,8 @@ export function DashboardContenido() {
         const r = Array.isArray(repoR) ? repoR : [];
         const f = Array.isArray(faltR) ? faltR : [];
         const t = Array.isArray(topStockR) ? topStockR : [];
+        const ab = Array.isArray(artsBajaR) ? artsBajaR : [];
+        const pb = Array.isArray(provBajaR) ? provBajaR : [];
 
         v.sort(
           (x, y) =>
@@ -96,6 +119,8 @@ export function DashboardContenido() {
         setReponer(r);
         setFaltantes(f);
         setTopStock(t);
+        setArticulosDadosDeBaja(ab);
+        setProveedoresDadosDeBaja(pb);
       } catch (e) {
         console.error("Dashboard | error al cargar:", e);
       }
@@ -138,7 +163,9 @@ export function DashboardContenido() {
             <tbody>
               {ventas.slice(0, 5).map((v) => (
                 <tr key={v.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2 text-center">{v.fechaVenta.split("T")[0]}</td>
+                  <td className="py-1.5 px-2 text-center">
+                    {v.fechaVenta.split("T")[0]}
+                  </td>
                   <td className="py-1.5 px-2 text-center">
                     {v.ventaTotal.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
@@ -201,7 +228,9 @@ export function DashboardContenido() {
             <tbody>
               {articulos.slice(0, 5).map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2 text-center">{a.codigoArticulo}</td>
+                  <td className="py-1.5 px-2 text-center">
+                    {a.codigoArticulo}
+                  </td>
                   <td className="py-1.5 px-2 text-center">
                     {a.fechaAlta ? a.fechaAlta.split("T")[0] : "—"}
                   </td>
@@ -234,7 +263,9 @@ export function DashboardContenido() {
             <tbody>
               {reponer.slice(0, 5).map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2 text-center">{a.nombreArticulo}</td>
+                  <td className="py-1.5 px-2 text-center">
+                    {a.nombreArticulo}
+                  </td>
                   <td className="py-1.5 px-2 text-center">{a.stockActual}</td>
                   <td className="py-1.5 px-2 text-center">{a.puntoPedido}</td>
                 </tr>
@@ -263,7 +294,9 @@ export function DashboardContenido() {
             <tbody>
               {faltantes.slice(0, 5).map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2 text-center">{a.nombreArticulo}</td>
+                  <td className="py-1.5 px-2 text-center">
+                    {a.nombreArticulo}
+                  </td>
                   <td className="py-1.5 px-2 text-center">{a.stockActual}</td>
                   <td className="py-1.5 px-2 text-center">
                     {a.stockSeguridad}
@@ -294,7 +327,9 @@ export function DashboardContenido() {
             <tbody>
               {topStock.map((a) => (
                 <tr key={a.id} className="border-b last:border-0">
-                  <td className="py-1.5 px-2 text-center">{a.nombreArticulo}</td>
+                  <td className="py-1.5 px-2 text-center">
+                    {a.nombreArticulo}
+                  </td>
                   <td className="py-1.5 px-2 text-center">{a.stockActual}</td>
                   <td className="py-1.5 px-2 text-center">
                     {a.proveedorPredeterminado?.nombreProveedor ?? "—"}
@@ -305,6 +340,70 @@ export function DashboardContenido() {
                 <tr>
                   <td colSpan={3} className="py-2 text-center text-gray-500">
                     Sin datos
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </DashboardCard>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* ─── Artículos dados de baja */}
+        <DashboardCard titulo="Artículos dados de baja">
+          <table className="min-w-full text-sm">
+            <thead className="text-xs text-gray-600 uppercase bg-gray-50">
+              <tr>
+                <th className="py-2 px-2 text-center">Código</th>
+                <th className="py-2 px-2 text-center">Nombre</th>
+                <th className="py-2 px-2 text-center">Fecha de baja</th>
+              </tr>
+            </thead>
+            <tbody>
+              {articulosDadosDeBaja.map((a) => (
+                <tr key={a.id} className="border-b last:border-0">
+                  <td className="py-1.5 px-2 text-center">
+                    {a.codigoArticulo}
+                  </td>
+                  <td className="py-1.5 px-2 text-center">
+                    {a.nombreArticulo}
+                  </td>
+                  <td className="py-1.5 px-2 text-center">
+                    {a.fechaBajaArticulo?.split("T")[0] ?? "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DashboardCard>
+
+        {/* ─── Proveedores dados de baja */}
+        <DashboardCard titulo="Proveedores dados de baja">
+          <table className="min-w-full text-sm">
+            <thead className="text-xs text-gray-600 uppercase bg-gray-50">
+              <tr>
+                <th className="py-2 px-2 text-center">Código</th>
+                <th className="py-2 px-2 text-center">Nombre</th>
+                <th className="py-2 px-2 text-center">Fecha de baja</th>
+              </tr>
+            </thead>
+            <tbody>
+              {proveedoresDadosDeBaja.map((p) => (
+                <tr key={p.id} className="border-b last:border-0">
+                  <td className="py-1.5 px-2 text-center">
+                    {p.codigoProveedor}
+                  </td>
+                  <td className="py-1.5 px-2 text-center">
+                    {p.nombreProveedor}
+                  </td>
+                  <td className="py-1.5 px-2 text-center">
+                    {p.fechaBajaProveedor?.split("T")[0] ?? "—"}
+                  </td>
+                </tr>
+              ))}
+              {proveedoresDadosDeBaja.length === 0 && (
+                <tr>
+                  <td colSpan={2} className="py-2 text-center text-gray-500">
+                    Sin proveedores dados de baja
                   </td>
                 </tr>
               )}

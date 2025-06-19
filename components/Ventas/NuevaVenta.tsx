@@ -28,13 +28,28 @@ export function NuevaVenta({ cerrar, alGuardar }: Props) {
       .catch(() => setArticulos([]));
   }, []);
 
-  const handleDetalleChange = (index: number, field: string, value: string) => {
-    const nuevoDetalle = [...formulario.detalle];
-    nuevoDetalle[index] = {
-      ...nuevoDetalle[index],
-      [field]: Number(value),
-    };
-    setFormulario((prev) => ({ ...prev, detalle: nuevoDetalle }));
+  const handleDetalleChange = (
+    index: number,
+    field: "articuloId" | "cantidadArticulo",
+    value: string
+  ) => {
+    const nuevosDetalles = [...formulario.detalle];
+
+    if (field === "articuloId") {
+      const idSeleccionado = Number(value);
+      const yaExiste = nuevosDetalles.some(
+        (item, i) => item.articuloId === idSeleccionado && i !== index
+      );
+      if (yaExiste) {
+        toast.warn("Ese artículo ya está seleccionado");
+        return;
+      }
+      nuevosDetalles[index].articuloId = idSeleccionado;
+    } else if (field === "cantidadArticulo") {
+      nuevosDetalles[index].cantidadArticulo = Number(value);
+    }
+
+    setFormulario((prev) => ({ ...prev, detalle: nuevosDetalles }));
   };
 
   const agregarArticulo = () => {

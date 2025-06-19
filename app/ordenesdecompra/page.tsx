@@ -5,27 +5,23 @@ import { PageContainer } from "@/components/Varios/PageContainer";
 import { NuevaOrdenCompra } from "@/components/OrdenesDeCompra/NuevaOrdenDeCompra";
 import { OrdenDeCompraCard } from "@/components/OrdenesDeCompra/OrdenDeCompraCard";
 
-type OrdenCompra = {
+type EstadoOrdenCompra = {
   id: number;
-  fechaOrden: string;
-  proveedor: { nombreProveedor: string };
-  total: number;
+  codigoEstadoOrdenCompra: string;
+  nombreEstadoOrdenCompra: string;
+  fechaBajaEstadoOrdenCompra: string | null;
 };
 
-const ordenesDePrueba: OrdenCompra[] = [
-  {
-    id: 1,
-    fechaOrden: "2024-05-01",
-    proveedor: { nombreProveedor: "Ferromax" },
-    total: 12500,
-  },
-  {
-    id: 2,
-    fechaOrden: "2024-05-15",
-    proveedor: { nombreProveedor: "Acindar" },
-    total: 18200,
-  },
-];
+type OrdenCompra = {
+  id: number;
+  fechaOrdenCompra: string;
+  proveedor: { nombreProveedor: string };
+  costoPedidoTotal: number;
+  costoCompraTotal: number;
+  costoTotal: number;
+  estado: EstadoOrdenCompra;
+};
+
 
 export default function OrdenesPage() {
   const [ordenes, setOrdenes] = useState<OrdenCompra[]>([]);
@@ -39,7 +35,6 @@ export default function OrdenesPage() {
         return res.json();
       })
       .then((data) => setOrdenes(data))
-      .catch(() => setOrdenes(ordenesDePrueba));
   };
 
   useEffect(() => {
@@ -59,7 +54,7 @@ export default function OrdenesPage() {
             onClick={() => setModalAbierto(true)}
             className="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700 transition"
           >
-            + Nueva orden
+            + Nueva Orden
           </button>
         </div>
 

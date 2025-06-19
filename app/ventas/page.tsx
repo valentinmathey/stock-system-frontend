@@ -58,7 +58,7 @@ export default function VentasPage() {
             onClick={() => setModalAbierto(true)}
             className="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700 transition"
           >
-            + Registrar venta
+            + Nueva Venta
           </button>
         </div>
 
