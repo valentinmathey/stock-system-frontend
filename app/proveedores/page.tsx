@@ -46,7 +46,11 @@ export default function ProveedoresPage() {
           </button>
         </div>
 
-        <ProveedorCard proveedores={proveedoresFiltrados} />
+        <ProveedorCard
+          proveedores={proveedoresFiltrados}
+          onRefresh={cargarProveedores}
+        />
+        
       </div>
 
       {modalAbierto && (

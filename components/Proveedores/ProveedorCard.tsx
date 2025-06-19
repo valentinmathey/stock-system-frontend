@@ -18,7 +18,7 @@ export function ProveedorCard({ proveedores, onRefresh }: Props) {
   const [modalAgregar, setModalAgregar] = useState(false);
   const [modalLista, setModalLista] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
-  const [modalEliminar, setModalEliminar] = useState<Proveedor | null>(null);
+  const [modalEliminar, setModalEliminar] = useState(false);
   const [provSel, setProvSel] = useState<Proveedor | null>(null);
 
   return (
@@ -56,7 +56,8 @@ export function ProveedorCard({ proveedores, onRefresh }: Props) {
                       setModalEditar(true);
                     }}
                     onEliminar={() => {
-                      setModalEliminar(p);
+                      setProvSel(p);
+                      setModalEliminar(true);
                     }}
                   />
                 </td>
@@ -96,12 +97,12 @@ export function ProveedorCard({ proveedores, onRefresh }: Props) {
       )}
 
       {/* Modal: Eliminar proveedor */}
-      {modalEliminar && (
+      {modalEliminar && provSel &&(
         <EliminarProveedor
-          proveedor={modalEliminar}
-          cerrar={() => setModalEliminar(null)}
+          proveedorId={provSel.id}
+          cerrar={() => setModalEliminar(false)}
           alGuardar={() => {
-            setModalEliminar(null);
+            setModalEliminar(false);
             onRefresh();
           }}
         />
