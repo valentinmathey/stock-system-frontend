@@ -20,7 +20,7 @@ type Articulo = {
   cgi?: number;
   loteOptimo?: number;
   puntoPedido?: number;
-  inventarioMaximo: number;
+  inventarioMaximo?: number;
   demandaAnual: number;
   proveedorPredeterminado?: { id: number; nombreProveedor: string };
 };
@@ -94,7 +94,7 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
                   {a.puntoPedido?.toFixed(2)}
                 </td>
                 <td className="px-4 py-2 text-center">
-                  {a.inventarioMaximo.toFixed(2)}
+                  {a.inventarioMaximo?.toFixed(2)}
                 </td>
                 <td className="px-4 py-2 text-center">
                   {a.demandaAnual.toFixed(2)}

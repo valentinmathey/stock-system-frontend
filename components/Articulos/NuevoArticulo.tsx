@@ -81,8 +81,15 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
       return;
     }
 
-    if (stockActual < 0 || stockSeguridad < 0 || demandaAnual < 0) {
-      toast.warn("Los valores de stock y demanda no pueden ser negativos.");
+    if (stockActual < 0 || stockSeguridad < 0 ) {
+      toast.warn("Los valores de stock no pueden ser negativos.");
+      return;
+    }
+    
+    if (demandaAnual < 2) {
+      toast.warn(
+        "La demanda anual debe ser al menos 2 para calcular el lote óptimo."
+      );
       return;
     }
 
