@@ -13,6 +13,7 @@ type Props = {
     stockActual: number;
     stockSeguridad: number;
     demandaAnual: number;
+    inventarioMaximo: number;
     proveedorPredeterminado?: { id: number };
   };
   cerrar: () => void;
@@ -202,6 +203,17 @@ export function EditarArticulo({ articulo, cerrar, alGuardar }: Props) {
             />
           </div>
 
+          <div>
+            <label className="font-medium">Inventario Máximo</label>
+            <input
+              type="number"
+              min={0}
+              name="inventarioMaximo"
+              value={formulario.inventarioMaximo}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
           <div className="col-span-2 flex justify-end gap-4 pt-4">
             <button
               type="button"
