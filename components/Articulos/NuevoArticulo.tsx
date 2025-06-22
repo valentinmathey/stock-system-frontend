@@ -162,11 +162,6 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             handleChange={handleChange}
           />
           <GesProInputNumber
-            name="inventarioMaximo"
-            label="Inventario Maximo"
-            handleChange={handleChange}
-          />
-          <GesProInputNumber
             name="stockSeguridad"
             label="Stock Seguridad"
             handleChange={handleChange}
