@@ -1,5 +1,5 @@
 "use client";
-import { HTMLInputTypeAttribute, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { GesProInputNumber, GesProInputText } from "../GesproInputs";
 import { toast } from "react-toastify";
 
@@ -28,6 +28,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
     puntoPedido: 0,
     inventarioMaximo: 0,
     demandaAnual: 0,
+    variacionDemanda: 0,
     proveedorPredeterminadoId: undefined,
   });
 
@@ -164,6 +165,11 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
           <GesProInputNumber
             name="demandaAnual"
             label="Demanda anual"
+            handleChange={handleChange}
+          />
+          <GesProInputNumber
+            name="variacionDemanda"
+            label="Variacion Demanda"
             handleChange={handleChange}
           />
 

@@ -22,6 +22,7 @@ type Articulo = {
   puntoPedido?: number;
   inventarioMaximo?: number;
   demandaAnual: number;
+  variacionDemanda: number;
   proveedorPredeterminado?: { id: number; nombreProveedor: string };
 };
 
@@ -56,6 +57,7 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
               <th className="px-4 py-3 text-center">Punto Pedido</th>
               <th className="px-4 py-3 text-center">Inventario Máximo</th>
               <th className="px-4 py-3 text-center">Demanda Anual</th>
+              <th className="px-4 py-3 text-center">Variación Demanda</th>
               <th className="px-4 py-3 text-center">Proveedor</th>
               <th className="px-4 py-2 text-center">Acciones</th>
             </tr>
@@ -99,6 +101,9 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
                 </td>
                 <td className="px-4 py-2 text-center">
                   {a.demandaAnual.toFixed(2)}
+                </td>
+                <td className="px-4 py-2 text-center">
+                  {a.variacionDemanda?.toFixed(2)}
                 </td>
                 <td className="px-4 py-2">
                   {a.proveedorPredeterminado?.nombreProveedor || "—"}
