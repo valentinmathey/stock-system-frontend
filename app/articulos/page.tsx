@@ -20,6 +20,7 @@ export type Articulo = {
   puntoPedido: number;
   inventarioMaximo: number;
   demandaAnual: number;
+  variacionDemanda: number;
   proveedorPredeterminado?: {
     id: number;
     nombreProveedor: string;

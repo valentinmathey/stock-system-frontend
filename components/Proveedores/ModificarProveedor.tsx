@@ -198,7 +198,7 @@ export default function ModificarProveedor({
     <div className="fixed inset-0 bg-black/60 z-40 flex items-center justify-center text-black">
       <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-8">
         <h2 className="text-2xl font-bold mb-6 text-center">
-          Modificar proveedor
+          Agregar Artículo
         </h2>
 
         <form

@@ -169,26 +169,16 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
           />
           <GesProInputNumber
             name="variacionDemanda"
-            label="Variacion Demanda"
+            label="Variación Demanda"
             handleChange={handleChange}
+            helperText={
+              <>
+                Variación demanda = (Demanda Anual / 365) × variaciónPorcentaje.
+                <br />
+                Ej: Variación Demanda= 50 × 0.10 = 5
+              </>
+            }
           />
-
-          {/* Selector de proveedor
-          <label className="font-medium">Proveedor</label>
-          <select
-            name="proveedorPredeterminadoId"
-            value={formulario.proveedorPredeterminadoId}
-            onChange={handleChange}
-            className="col-span-2 border border-gray-300 rounded px-3 py-2"
-          >
-            <option value="">Seleccioná un proveedor</option>
-            {proveedores.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nombreProveedor}
-              </option>
-            ))}
-          </select> */}
-
           {/* Botones */}
           <div className="col-span-2 flex justify-end gap-4 pt-4">
             <button

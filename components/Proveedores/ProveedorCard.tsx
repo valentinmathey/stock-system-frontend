@@ -5,6 +5,7 @@ import ModificarProveedor from "./ModificarProveedor";
 import ProviderActions from "./ProviderActions";
 import ListaArtProvCard from "./ListaArtProvCard";
 import { EliminarProveedor } from "./EliminarProveedor";
+import EditarProveedor from "./EditarProveedor";
 
 type Proveedor = {
   id: number;
@@ -27,20 +28,19 @@ export function ProveedorCard({ proveedores, onRefresh }: Props) {
         <table className="w-full text-sm text-gray-700">
           <thead className="bg-gray-100 text-xs text-gray-600 uppercase">
             <tr>
-              <th className="px-4 py-3 text-center">Nombre</th>
               <th className="px-4 py-3 text-center">Código</th>
+              <th className="px-4 py-3 text-center">Nombre</th>
               <th className="px-4 py-3 text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {proveedores.map((p) => (
               <tr key={p.id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-2 text-center">{p.codigoProveedor}</td>
                 <td className="px-4 py-2 font-medium text-center">
                   {p.nombreProveedor}
                 </td>
-                <td className="px-4 py-2 text-center">
-                  {p.codigoProveedor}
-                </td>
+
                 <td className="px-4 py-2 text-center">
                   <ProviderActions
                     onAgregarArticulo={() => {
@@ -86,7 +86,7 @@ export function ProveedorCard({ proveedores, onRefresh }: Props) {
         />
       )}
       {modalEditar && provSel && (
-        <ModificarProveedor
+        <EditarProveedor
           proveedorId={provSel.id}
           cerrar={() => setModalEditar(false)}
           alGuardar={() => {
@@ -97,7 +97,7 @@ export function ProveedorCard({ proveedores, onRefresh }: Props) {
       )}
 
       {/* Modal: Eliminar proveedor */}
-      {modalEliminar && provSel &&(
+      {modalEliminar && provSel && (
         <EliminarProveedor
           proveedorId={provSel.id}
           cerrar={() => setModalEliminar(false)}

@@ -42,7 +42,7 @@ export function Sidebar() {
   }, []);
 
   return (
-    <aside className="w-70 h-screen bg-white shadow-md p-4 flex flex-col justify-between text-black">
+    <aside className="w-64 h-screen bg-white shadow-md p-4 flex flex-col justify-between text-black">
       <div>
         <Link href="/" className="block">
           <h2 className="text-2xl font-bold mb-8 cursor-pointer">GESPRO</h2>
@@ -81,16 +81,25 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="relative w-fit mx-auto mb-20">
-        {/* Ícono flotante 💡 */}
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 bg-green-200 text-2xl px-2 py-1 rounded-full shadow">
-          💡
+      <div className="relative w-fit mx-auto mb-20 group transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 hover:shadow-xl">
+
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+          <div className="bg-violet-300 w-20 h-20 rounded-full flex items-center justify-center shadow-lg ring-1 ring-white ring-opacity-40 transition-transform duration-400 group-hover:scale-110 group-hover:-translate-y-2">
+            <img
+              src="/foco.png"
+              alt="Foco GESPRO"
+              className="w-16 h-16 object-contain transition-transform duration-500 group-hover:rotate-12"
+            />
+          </div>
         </div>
 
-        {/* Caja del consejo */}
-        <div className="bg-green-100 text-sm p-4 rounded shadow text-center transition-transform duration-300 hover:scale-[1.01] z-0 relative mt-2">
-          <p className="font-bold text-lg mb-1 mt-2">Consejo de GESPRO</p>
-          <p className="text-gray-800 min-h-[55px]">{frasesSidebar[index]}</p>
+        <div className="bg-gradient-to-br from-violet-200 via-violet-100 to-violet-200 text-sm p-4 rounded shadow text-center relative mt-10 transition-all duration-300">
+          <p className="font-bold text-lg mb-1 mt-2 text-black">
+            Consejo de GESPRO
+          </p>
+          <p className="text-black min-h-[55px] transition-colors duration-300">
+            {frasesSidebar[index]}
+          </p>
         </div>
       </div>
     </aside>
