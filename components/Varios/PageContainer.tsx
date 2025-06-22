@@ -26,7 +26,7 @@ export function PageContainer({
           onBuscar={onBuscar}
           showSearch={showSearch}
         />
-        <div className="p-6">{children}</div>
+        <div className="p-6 overflow-x-auto max-w-full">{children}</div>
       </div>
     </main>
   );
