@@ -7,31 +7,9 @@ import { NuevoProveedor } from "@/components/Proveedores/NuevoProveedor";
 
 type Proveedor = {
   id: number;
+  codigoProveedor: string;
   nombreProveedor: string;
-  cuitProveedor: string;
-  telefonoProveedor: string;
-  correoProveedor: string;
-  direccionProveedor: string;
 };
-
-const proveedoresDePrueba: Proveedor[] = [
-  {
-    id: 1,
-    nombreProveedor: "Holcim",
-    cuitProveedor: "30-12345678-9",
-    telefonoProveedor: "261-1234567",
-    correoProveedor: "contacto@holcim.com",
-    direccionProveedor: "Av. Cemento 123",
-  },
-  {
-    id: 2,
-    nombreProveedor: "Ferromax",
-    cuitProveedor: "30-23456789-0",
-    telefonoProveedor: "261-9876543",
-    correoProveedor: "ventas@ferromax.com",
-    direccionProveedor: "Calle Fierro 456",
-  },
-];
 
 export default function ProveedoresPage() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
@@ -44,8 +22,7 @@ export default function ProveedoresPage() {
         if (!res.ok) throw new Error("Backend no disponible");
         return res.json();
       })
-      .then((data) => setProveedores(data))
-      .catch(() => setProveedores(proveedoresDePrueba));
+      .then((data) => setProveedores(data));
   };
 
   useEffect(() => {
@@ -65,17 +42,22 @@ export default function ProveedoresPage() {
             onClick={() => setModalAbierto(true)}
             className="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700 transition"
           >
-            + Nuevo proveedor
+            + Nuevo Proveedor
           </button>
         </div>
 
-        <ProveedorCard proveedores={proveedoresFiltrados} />
+        <ProveedorCard
+          proveedores={proveedoresFiltrados}
+          onRefresh={cargarProveedores}
+        />
+        
       </div>
 
       {modalAbierto && (
         <NuevoProveedor
           cerrar={() => setModalAbierto(false)}
           alGuardar={() => {
+            console.log("guardando proveedor...");
             setModalAbierto(false);
             cargarProveedores();
           }}

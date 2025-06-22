@@ -3,24 +3,27 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-/* --------- Tipos --------- */
+/* ---------- Tipos ---------- */
 type Articulo = { id: number; nombreArticulo: string };
+type Relacion = { id: number; articulo: { id: number } };
 
 type Props = {
+  proveedorId: number;
   cerrar: () => void;
   alGuardar: () => void;
 };
 
-/* ================================================================= */
-export function NuevoProveedor({ cerrar, alGuardar }: Props) {
+/* --------------------------------------------------------------- */
+export default function ModificarProveedor({
+  proveedorId,
+  cerrar,
+  alGuardar,
+}: Props) {
   /* ---------- State ---------- */
   const [articulos, setArticulos] = useState<Articulo[]>([]);
-
-  const [form, setForm] = useState({
-    codigoProveedor: "",
+  const [formulario, setFormulario] = useState({
     nombreProveedor: "",
     articulo: {
-      proveedorId: 0,
       articuloId: 0,
       modeloInventario: "LOTE_FIJO",
       costoPedido: 0,
@@ -30,124 +33,155 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
     },
   });
 
-  /* ---------- Carga de artículos ---------- */
+  /* ---------- Carga inicial ---------- */
   useEffect(() => {
-    fetch("http://localhost:3000/articulos")
-      .then((r) => r.json())
-      .then(setArticulos)
+    /* Relaciones de ESTE proveedor */
+    const relsPromise: Promise<Relacion[]> = fetch(
+      `http://localhost:3000/articulos-proveedores/por-proveedor/${proveedorId}`
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []);
+
+    /* Todos los artículos */
+    const artsPromise: Promise<Articulo[]> = fetch(
+      "http://localhost:3000/articulos"
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []);
+
+    /* Filtramos los que ya existen en la relación */
+    Promise.all([relsPromise, artsPromise])
+      .then(([rels, allArts]) => {
+        const usados = new Set<number>(rels.map((rel) => rel.articulo.id));
+        const disponibles = allArts.filter((a) => !usados.has(a.id));
+
+        setArticulos(disponibles);
+
+        /* Pre-selección si no había valor */
+        setFormulario((prev) => ({
+          ...prev,
+          articulo: {
+            ...prev.articulo,
+            articuloId: disponibles[0]?.id ?? 0,
+          },
+        }));
+      })
       .catch(() => setArticulos([]));
-  }, []);
+
+    /* Nombre del proveedor */
+    fetch(`http://localhost:3000/proveedores/${proveedorId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(
+        (prov) =>
+          prov &&
+          setFormulario((prev) => ({
+            ...prev,
+            nombreProveedor: prov.nombreProveedor,
+          }))
+      );
+  }, [proveedorId]);
 
   /* ---------- Handlers ---------- */
+  const numericFields = new Set([
+    "articuloId",
+    "costoPedido",
+    "costoCompraUnitarioArticulo",
+    "demoraEntregaProveedor",
+    "tiempoRevision",
+  ]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    const numeric = [
-      "articuloId",
-      "costoPedido",
-      "costoCompraUnitarioArticulo",
-      "demoraEntregaProveedor",
-      "tiempoRevision",
-    ];
 
-    if (name in form.articulo) {
-      setForm((prev) => {
-        const next: any = {
+    if (name in formulario.articulo) {
+      setFormulario((prev) => {
+        const next = {
           ...prev.articulo,
           [name]:
-            numeric.includes(name) && name !== "modeloInventario"
+            numericFields.has(name) && name !== "modeloInventario"
               ? Number(value)
               : value,
         };
-
-        /* Si cambia a LOTE_FIJO limpiamos tiempoRevision */
         if (name === "modeloInventario" && value === "LOTE_FIJO") {
           next.tiempoRevision = undefined;
         }
-
         return { ...prev, articulo: next };
       });
     } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      setFormulario((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   /* ---------- Helpers ---------- */
+  const esTiempoFijo = formulario.articulo.modeloInventario === "TIEMPO_FIJO";
+
   const buildPayload = () => {
-    const { articulo, ...proveedor } = form;
-
-    const payload: any = {
-      ...proveedor,
-      articulo: {
-        proveedorId: articulo.proveedorId, // 0, se setea en backend
-        articuloId: articulo.articuloId,
-        modeloInventario: articulo.modeloInventario,
-        costoPedido: articulo.costoPedido,
-        costoCompraUnitarioArticulo: articulo.costoCompraUnitarioArticulo,
-        demoraEntregaProveedor: articulo.demoraEntregaProveedor,
-      },
+    const { articulo } = formulario;
+    return {
+      proveedorId,
+      articuloId: articulo.articuloId,
+      modeloInventario: articulo.modeloInventario,
+      costoPedido: articulo.costoPedido,
+      costoCompraUnitarioArticulo: articulo.costoCompraUnitarioArticulo,
+      demoraEntregaProveedor: articulo.demoraEntregaProveedor,
+      ...(esTiempoFijo && { tiempoRevision: articulo.tiempoRevision }),
     };
-
-    if (articulo.modeloInventario === "TIEMPO_FIJO") {
-      payload.articulo.tiempoRevision = articulo.tiempoRevision;
-    }
-    return payload;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.codigoProveedor.trim() || !form.nombreProveedor.trim()) {
-      toast.warn("Completá el código y nombre del proveedor.");
-      return;
-    }
+    // Validaciones frontend
+    const art = formulario.articulo;
 
-    if (form.articulo.articuloId === 0) {
+    if (art.articuloId === 0) {
       toast.warn("Seleccioná un artículo.");
       return;
     }
 
-    if (form.articulo.costoPedido <= 0) {
+    if (art.costoPedido <= 0) {
       toast.warn("El costo de pedido debe ser mayor a 0.");
       return;
     }
-    if (form.articulo.costoCompraUnitarioArticulo <= 0) {
+
+    if (art.costoCompraUnitarioArticulo <= 0) {
       toast.warn("El costo unitario debe ser mayor a 0.");
       return;
     }
-    if (form.articulo.demoraEntregaProveedor <= 0) {
+
+    if (art.demoraEntregaProveedor <= 0) {
       toast.warn("La demora de entrega debe ser mayor a 0.");
       return;
     }
 
     if (
-      form.articulo.modeloInventario === "TIEMPO_FIJO" &&
-      (!form.articulo.tiempoRevision || form.articulo.tiempoRevision <= 0)
+      art.modeloInventario === "TIEMPO_FIJO" &&
+      (!art.tiempoRevision || art.tiempoRevision <= 0)
     ) {
       toast.warn("El tiempo de revisión debe ser mayor a 0.");
       return;
     }
 
+    // Enviar al backend
     try {
-      const res = await fetch("http://localhost:3000/proveedores", {
+      const res = await fetch("http://localhost:3000/articulos-proveedores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(buildPayload()),
       });
 
       if (res.ok) {
-        toast.success("Proveedor creado correctamente");
+        toast.success("Relación proveedor-artículo creada correctamente.");
         alGuardar();
         cerrar();
       } else {
         const err = await res.json().catch(() => ({}));
         const msg = err.message ?? "Error desconocido";
 
-        if (msg.includes("proveedor con código")) {
-          toast.error("Ya existe un proveedor con ese código.");
-        } else if (msg.includes("artículo") && msg.includes("no existe")) {
-          toast.error("El artículo seleccionado no existe.");
+        if (msg.includes("relación") && msg.includes("existente")) {
+          toast.error("Ya existe una relación con este artículo.");
         } else if (msg.includes("modeloInventario")) {
           toast.error("Faltan datos para el modelo de inventario.");
         } else {
@@ -155,49 +189,36 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
         }
       }
     } catch (err) {
-      toast.error("Error al conectar con el servidor");
+      toast.error("Error al conectar con el servidor.");
     }
   };
 
-  /* ---------- UI helpers ---------- */
-  const esTiempoFijo = form.articulo.modeloInventario === "TIEMPO_FIJO";
-
-  /* ---------------------------- UI ---------------------------- */
+  /* ---------- UI ---------- */
   return (
     <div className="fixed inset-0 bg-black/60 z-40 flex items-center justify-center text-black">
-      <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-8 z-50 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-6 text-center">Nuevo proveedor</h2>
+      <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-8">
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Modificar proveedor
+        </h2>
 
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-2 gap-x-6 gap-y-4"
         >
-          {/* Código y Nombre */}
-          <label className="font-medium">Código</label>
-          <input
-            type="text"
-            name="codigoProveedor"
-            value={form.codigoProveedor}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-
+          {/* Nombre (solo lectura) */}
           <label className="font-medium">Nombre</label>
           <input
             type="text"
-            name="nombreProveedor"
-            value={form.nombreProveedor}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            value={formulario.nombreProveedor}
+            disabled
+            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100"
           />
 
           {/* Artículo */}
           <label className="font-medium">Artículo</label>
           <select
             name="articuloId"
-            value={form.articulo.articuloId}
+            value={formulario.articulo.articuloId}
             onChange={handleChange}
             required
             className="col-span-2 border border-gray-300 rounded px-3 py-2"
@@ -210,14 +231,13 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
             ))}
           </select>
 
-          {/* Modelo */}
+          {/* Modelo de inventario */}
           <label className="font-medium">Modelo de Inventario</label>
           <select
             name="modeloInventario"
-            value={form.articulo.modeloInventario}
+            value={formulario.articulo.modeloInventario}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2"
-            required
           >
             <option value="LOTE_FIJO">Lote Fijo</option>
             <option value="TIEMPO_FIJO">Tiempo Fijo</option>
@@ -227,47 +247,47 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
           <label className="font-medium">Costo pedido</label>
           <input
             type="number"
-            min={0}
             name="costoPedido"
-            value={form.articulo.costoPedido}
+            value={formulario.articulo.costoPedido}
             onChange={handleChange}
             required
+            min={0}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
           <label className="font-medium">Costo compra unitario</label>
           <input
             type="number"
-            min={0}
             name="costoCompraUnitarioArticulo"
-            value={form.articulo.costoCompraUnitarioArticulo}
+            value={formulario.articulo.costoCompraUnitarioArticulo}
             onChange={handleChange}
             required
+            min={0}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
           <label className="font-medium">Demora entrega (días)</label>
           <input
             type="number"
-            min={0}
             name="demoraEntregaProveedor"
-            value={form.articulo.demoraEntregaProveedor}
+            value={formulario.articulo.demoraEntregaProveedor}
             onChange={handleChange}
             required
+            min={0}
             className="w-full border border-gray-300 rounded px-3 py-2"
           />
 
-          {/* Tiempo de revisión solo si es TIEMPO_FIJO */}
+          {/* Tiempo de revisión */}
           {esTiempoFijo && (
             <>
               <label className="font-medium">Tiempo de Revisión</label>
               <input
                 type="number"
                 name="tiempoRevision"
-                value={form.articulo.tiempoRevision ?? ""}
+                value={formulario.articulo.tiempoRevision ?? ""}
                 onChange={handleChange}
-                required
                 min={0}
+                required
                 className="w-full border border-gray-300 rounded px-3 py-2"
               />
             </>
@@ -286,7 +306,7 @@ export function NuevoProveedor({ cerrar, alGuardar }: Props) {
               type="submit"
               className="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700"
             >
-              Guardar proveedor
+              Guardar cambios
             </button>
           </div>
         </form>

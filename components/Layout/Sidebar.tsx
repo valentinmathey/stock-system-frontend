@@ -9,14 +9,44 @@ import {
   FileText,
   ArrowRightLeft,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+export const frasesSidebar = [
+  "Recordá revisar el stock de artículos en punto de pedido",
+  "Verificá que los proveedores estén activos antes de cargar una orden",
+  "Las ventas descuentan stock automáticamente",
+  "No olvides actualizar el costo de almacenamiento si varía",
+  "El lote óptimo ayuda a reducir costos logísticos",
+  "Mantené la información del proveedor siempre actualizada",
+  "Las órdenes de compra no afectan el stock hasta su recepción",
+  "El punto de pedido se calcula en base a la demanda y la demora",
+  "El stock de seguridad evita quiebres por incertidumbre",
+  "Podés dar de baja artículos o proveedores si ya no se usan",
+  "Verificá el historial de ventas para mejorar la previsión",
+  "La demanda anual influye en la planificación de compras",
+  "Podés agregar múltiples artículos en una sola orden",
+  "Las ventas no se pueden registrar con stock insuficiente",
+  "La fecha de baja no elimina registros, solo los oculta",
+];
 
 export function Sidebar() {
   const pathname = usePathname();
 
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      setIndex((prev) => (prev + 1) % frasesSidebar.length);
+    }, 5000);
+    return () => clearInterval(intervalo);
+  }, []);
+
   return (
     <aside className="w-70 h-screen bg-white shadow-md p-4 flex flex-col justify-between text-black">
       <div>
-        <h2 className="text-2xl font-bold mb-8">GESPRO</h2>
+        <Link href="/" className="block">
+          <h2 className="text-2xl font-bold mb-8 cursor-pointer">GESPRO</h2>
+        </Link>
         <nav className="space-y-4">
           <SidebarItem
             label="Dashboard"
@@ -51,14 +81,16 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="relative w-fit mx-auto mb-20 transition duration-300 hover:scale-102">
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-green-200 text-2xl px-2 py-1 rounded-xs shadow">
+      <div className="relative w-fit mx-auto mb-20">
+        {/* Ícono flotante 💡 */}
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 bg-green-200 text-2xl px-2 py-1 rounded-full shadow">
           💡
         </div>
 
-        <div className="bg-green-100 text-md p-4 rounded-xs text-center shadow">
-          <p className="font-bold text-lg">Consejo de GESPRO </p>
-          Recordá revisar el stock de artículos en punto de pedido.
+        {/* Caja del consejo */}
+        <div className="bg-green-100 text-sm p-4 rounded shadow text-center transition-transform duration-300 hover:scale-[1.01] z-0 relative mt-2">
+          <p className="font-bold text-lg mb-1 mt-2">Consejo de GESPRO</p>
+          <p className="text-gray-800 min-h-[55px]">{frasesSidebar[index]}</p>
         </div>
       </div>
     </aside>

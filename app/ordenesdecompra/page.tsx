@@ -5,28 +5,23 @@ import { PageContainer } from "@/components/Varios/PageContainer";
 import { NuevaOrdenCompra } from "@/components/OrdenesDeCompra/NuevaOrdenDeCompra";
 import { OrdenDeCompraCard } from "@/components/OrdenesDeCompra/OrdenDeCompraCard";
 
+type EstadoOrdenCompra = {
+  id: number;
+  codigoEstadoOrdenCompra: string;
+  nombreEstadoOrdenCompra: string;
+  fechaBajaEstadoOrdenCompra: string | null;
+};
 
 type OrdenCompra = {
   id: number;
-  fechaOrden: string;
+  fechaOrdenCompra: string;
   proveedor: { nombreProveedor: string };
-  total: number;
+  costoPedidoTotal: number;
+  costoCompraTotal: number;
+  costoTotal: number;
+  estado: EstadoOrdenCompra;
 };
 
-const ordenesDePrueba: OrdenCompra[] = [
-  {
-    id: 1,
-    fechaOrden: "2024-05-01",
-    proveedor: { nombreProveedor: "Ferromax" },
-    total: 12500,
-  },
-  {
-    id: 2,
-    fechaOrden: "2024-05-15",
-    proveedor: { nombreProveedor: "Acindar" },
-    total: 18200,
-  },
-];
 
 export default function OrdenesPage() {
   const [ordenes, setOrdenes] = useState<OrdenCompra[]>([]);
@@ -34,13 +29,12 @@ export default function OrdenesPage() {
   const [busqueda, setBusqueda] = useState("");
 
   const cargarOrdenes = () => {
-    fetch("http://localhost:3000/ordenes")
+    fetch("http://localhost:3000/ordenes-compra")
       .then((res) => {
         if (!res.ok) throw new Error("Backend no disponible");
         return res.json();
       })
       .then((data) => setOrdenes(data))
-      .catch(() => setOrdenes(ordenesDePrueba));
   };
 
   useEffect(() => {
@@ -60,19 +54,22 @@ export default function OrdenesPage() {
             onClick={() => setModalAbierto(true)}
             className="bg-violet-600 text-white px-4 py-2 rounded hover:bg-violet-700 transition"
           >
-            + Nueva orden
+            + Nueva Orden
           </button>
         </div>
 
-        <OrdenDeCompraCard ordenes={ordenesFiltradas} />
+        <OrdenDeCompraCard
+          ordenes={ordenesFiltradas}
+          alGuardar={cargarOrdenes}
+        />
       </div>
 
       {modalAbierto && (
         <NuevaOrdenCompra
           cerrar={() => setModalAbierto(false)}
           alGuardar={() => {
+            cargarOrdenes(); // esta sí está definida acá
             setModalAbierto(false);
-            cargarOrdenes();
           }}
         />
       )}
