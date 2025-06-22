@@ -11,9 +11,7 @@ type Props = {
     precioVentaUnitarioArticulo: number;
     costoAlmacenamientoPorUnidad: number;
     stockActual: number;
-    stockSeguridad: number;
     demandaAnual: number;
-    inventarioMaximo: number;
     proveedorPredeterminado?: { id: number };
   };
   cerrar: () => void;
@@ -47,7 +45,6 @@ export function EditarArticulo({ articulo, cerrar, alGuardar }: Props) {
       precioVentaUnitarioArticulo,
       costoAlmacenamientoPorUnidad,
       stockActual,
-      stockSeguridad,
       demandaAnual,
     } = formulario;
     const proveedorPredeterminadoId = articulo.proveedorPredeterminado?.id;
@@ -64,7 +61,7 @@ export function EditarArticulo({ articulo, cerrar, alGuardar }: Props) {
       toast.warn("El costo de almacenamiento debe ser mayor a 0.");
       return;
     }
-    if (stockActual < 0 || stockSeguridad < 0 || demandaAnual < 0) {
+    if (stockActual < 0 || demandaAnual < 0) {
       toast.warn("Los valores de stock no pueden ser negativos.");
       return;
     }
@@ -179,7 +176,7 @@ export function EditarArticulo({ articulo, cerrar, alGuardar }: Props) {
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="font-medium">Stock Seguridad</label>
             <input
               type="number"
@@ -189,7 +186,7 @@ export function EditarArticulo({ articulo, cerrar, alGuardar }: Props) {
               onChange={handleChange}
               className="w-full border border-gray-300 rounded px-3 py-2"
             />
-          </div>
+          </div> */}
 
           <div>
             <label className="font-medium">Demanda anual</label>

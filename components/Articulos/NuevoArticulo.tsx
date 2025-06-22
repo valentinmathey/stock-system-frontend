@@ -81,7 +81,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
       return;
     }
 
-    if (stockActual < 0 || stockSeguridad < 0) {
+    if (stockActual < 0) {
       toast.warn("Los valores de stock no pueden ser negativos.");
       return;
     }
@@ -162,17 +162,12 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
             handleChange={handleChange}
           />
           <GesProInputNumber
-            name="stockSeguridad"
-            label="Stock Seguridad"
-            handleChange={handleChange}
-          />
-          <GesProInputNumber
             name="demandaAnual"
             label="Demanda anual"
             handleChange={handleChange}
           />
 
-          {/* Selector de proveedor */}
+          {/* Selector de proveedor
           <label className="font-medium">Proveedor</label>
           <select
             name="proveedorPredeterminadoId"
@@ -186,7 +181,7 @@ export function NuevoArticulo({ cerrar, alGuardar }: Props) {
                 {p.nombreProveedor}
               </option>
             ))}
-          </select>
+          </select> */}
 
           {/* Botones */}
           <div className="col-span-2 flex justify-end gap-4 pt-4">
