@@ -50,7 +50,7 @@ export function ArticuloTable({ articulos, onGuardar }: Props) {
               <th className="px-4 py-3 text-center">Stock actual</th>
               <th className="px-4 py-3 text-center">Stock seguridad</th>
               <th className="px-4 py-3 text-center">Costo Almacenamiento</th>
-              <th className="px-4 py-3 text-center">Precio Venta ($)</th>
+              <th className="px-4 py-3 text-center">Precio Venta</th>
               <th className="px-4 py-3 text-center">CGI</th>
               <th className="px-4 py-3 text-center">Lote Óptimo</th>
               <th className="px-4 py-3 text-center">Punto Pedido</th>
